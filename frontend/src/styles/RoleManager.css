@@ -1,0 +1,89 @@
+/* Inherit base styles from global or CityManager if you prefer, 
+   but here are the specifics for the Permission Grid */
+
+.role-manager-container {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* --- Permission Grid in Modal --- */
+.permissions-section {
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.permissions-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Custom Checkbox Tile */
+.perm-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.perm-checkbox:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.perm-checkbox.selected {
+  background: rgba(124, 77, 255, 0.15); /* Purple Tint */
+  border-color: #7c4dff;
+  color: #fff;
+}
+
+.perm-checkbox input {
+  display: none; /* Hide default checkbox */
+}
+
+.checkmark {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.perm-checkbox.selected .checkmark {
+  background: #7c4dff;
+  border-color: #7c4dff;
+}
+
+.perm-checkbox.selected .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: -3px;
+  left: 1px;
+  font-size: 11px;
+  color: white;
+  font-weight: bold;
+}
+
+.perm-name {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}

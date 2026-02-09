@@ -1,0 +1,150 @@
+.topbar {
+  position: fixed;
+  top: 11px;
+  right: 11px;
+  height: 60px;
+  background: #0f0f0fb3;
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid #ffffff1a;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 998;
+  box-shadow: 0 10px 30px #00000066;
+  transition: all 0.5s cubic-bezier(0.3, 0.8, 0.2, 1);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  overflow: hidden;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ffffffe6;
+  white-space: nowrap;
+  letter-spacing: 0.03rem;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* City Select Adjustment for the Island */
+.topbar-city-select {
+  width: auto;
+  min-width: 125px;
+  transition: width 0.3s ease;
+}
+.topbar .glass-input-wrapper {
+  margin-bottom: 0;
+}
+.topbar-city-select .glass-label {
+  display: none;
+}
+.topbar-city-select .glass-select-header {
+  padding: 12px 15px;
+  border: none;
+  border-radius: 999px;
+  background: #ffffff0d;
+}
+.topbar-city-select .selected-text {
+  padding-right: 7px;
+}
+.topbar-city-select .glass-select-header .select-arrow {
+  font-size: 12px;
+  margin-top: 2px;
+}
+.topbar-city-select .glass-select-header.active .select-arrow {
+  margin-bottom: 2px;
+}
+
+/* Profile avatar */
+.profile-section {
+  cursor: pointer;
+}
+.initials-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #171717;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  border: 1px solid #ffffff33;
+}
+/* Profile avatar dropdown */
+.island-dropdown {
+  right: 5px;
+  top: 52px;
+  width: 180px;
+  backdrop-filter: blur(50px);
+  background: #0a0a0ae0;
+}
+.profile-section .glass-option.logout {
+  color: var(--error-red);
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .topbar { 
+    left: calc(270px + 11px);
+    width: auto;
+    min-width: 400px;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .topbar { 
+    left: calc(90px + 11px); 
+    padding: 0 17px;
+  }
+
+  .initials-avatar {
+    width: 43px;
+    height: 43px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .topbar { 
+    left: 11px;
+    right: 11px;
+    height: 54px;
+    padding: 0 13px 0 18px;
+  }
+
+  .page-title {
+    font-size: 0.95rem;
+  }
+  .topbar-city-select {
+    width: 110px;
+  }
+  .topbar-city-select .glass-select-header {
+    font-size: 0.85rem;
+  }
+
+  .initials-avatar {
+    width: 41px;
+    height: 41px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 380px) {
+    .topbar-city-select { display: none; }
+  }
+}
