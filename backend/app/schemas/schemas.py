@@ -59,12 +59,41 @@ class CitySchema(CityBase):
 class MealSchema(BaseModel):
     id: int
     vendor_id: int
+    kitchen_name: Optional[str] = None  # from vendor relationship
     name: str
     base_price: Decimal
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    schedule_days: Optional[str] = None  # "Mon,Wed,Fri" or None = daily
     is_always_available: bool
     is_active: bool
+
+    @classmethod
+    def from_orm_with_kitchen(cls, meal):
+        obj = cls.model_validate(meal)
+        obj.kitchen_name = meal.vendor.kitchen_name if meal.vendor else None
+        return obj
+
     class Config:
         from_attributes = True
+
+class MealCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=150)
+    base_price: Decimal = Field(..., gt=0)
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    schedule_days: Optional[str] = None  # None = daily, else "Mon,Wed"
+    is_always_available: bool = True
+    is_active: bool = True
+
+class MealUpdate(BaseModel):
+    name: Optional[str] = None
+    base_price: Optional[Decimal] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    schedule_days: Optional[str] = None
+    is_always_available: Optional[bool] = None
+    is_active: Optional[bool] = None
 
 # --- VENDOR ---
 class VendorProfileSchema(BaseModel):
@@ -82,6 +111,27 @@ class VendorProfileUpdate(BaseModel):
     is_open: Optional[bool] = None
     open_time: Optional[time] = None
     close_time: Optional[time] = None
+
+class AdminPasswordUpdate(BaseModel):
+    new_password: str = Field(..., min_length=6)
+
+class SelfPasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=6)
+    confirm_password: str
+
+class SelfProfileUpdate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=50)
+    phone: str
+    city_id: int
+
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: str):
+        clean_phone = re.sub(r'\D', '', v)
+        if len(clean_phone) != 10:
+            raise ValueError('Phone number must be exactly 10 digits')
+        return clean_phone
 
 # --- AUTH & USER ---
 class ProfileCreate(BaseModel):
@@ -121,6 +171,7 @@ class AddressCreate(BaseModel):
     label: str = Field(default="home", description="e.g. home, office, other")
     address_text: str = Field(..., min_length=5)
     house_no: Optional[str] = None
+    pincode: Optional[str] = None
     google_maps_url: Optional[str] = None
     house_photo_url: Optional[str] = None
 

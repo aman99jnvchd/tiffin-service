@@ -1,0 +1,218 @@
+/* Card View Container */
+.card-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  position: relative;
+}
+
+/* Individual Card */
+.card-view-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.25rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card-view-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Card Header - Name on left, Actions on right */
+.card-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.card-view-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* Action Buttons Container */
+.card-view-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Basic Info Section - Column name on left, value on right */
+.card-view-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1rem;
+  padding-top: 0;
+}
+
+.card-view-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-view-info-item:last-child {
+  border-bottom: none;
+}
+
+.card-view-info-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.card-view-info-value {
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+}
+
+/* Expanded Section */
+.card-view-expanded {
+  overflow: hidden;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-view-expanded-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Extras/Tags */
+.card-view-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.card-view-tag {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Badge styles (for slug, etc.) */
+.card-view-info-value .slug-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(124, 77, 255, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(124, 77, 255, 0.3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.card-view-info-value .perm-count-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Toggle Button */
+.card-view-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card-view-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Empty State */
+.card-view-empty {
+  text-align: center;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.95rem;
+}
+
+/* Desktop: Hide card view, show table */
+@media (min-width: 769px) {
+  .card-view-container,
+  .card-view-empty {
+    display: none;
+  }
+}
+
+/* Mobile: Show card view, hide table */
+@media (max-width: 768px) {
+  .table-card {
+    display: none;
+  }
+  
+  .cards-container-wrapper {
+    display: block;
+  }
+  
+  .card-view-container {
+    display: flex;
+  }
+  
+  .card-view-item {
+    padding: 0;
+  }
+  
+  .card-view-header {
+    flex-wrap: wrap;
+  }
+  
+  .card-view-actions {
+    gap: 0.25rem;
+  }
+  
+  .card-view-info-value {
+    word-break: break-word;
+    text-align: right;
+  }
+
+  .card-view-empty {
+    position: relative;
+  }
+}

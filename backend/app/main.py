@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 
 from .db.session import engine
 from .models import models
-from .api import meals, admin, vendors, auth, orders, addresses, uploads
+from .api import meals, admin, vendors, auth, orders, addresses, uploads, users
 
 # Initialize Database Tables
 try:
@@ -71,6 +71,7 @@ app.include_router(meals.router, prefix="/api/v1", tags=["Meals"])
 app.include_router(addresses.router, prefix="/api/v1", tags=["Addresses"])
 app.include_router(orders.router, prefix="/api/v1", tags=["Orders"])
 app.include_router(uploads.router, prefix="/api/v1", tags=["Uploads"])
+app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 
 # --- 5. Base Health Check ---
 @app.get("/", tags=["Health"])

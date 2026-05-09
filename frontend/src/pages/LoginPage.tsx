@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react';
 import { GlassInput } from '../components/GlassInput';
 import { useAuthStore } from '../store/useAuthStore';
-import { loginUser } from '../api/axios';
+import { loginUser, getMyPermissions } from '../api/axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToastStore } from '../store/useToastStore';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const setPermissions = useAuthStore((state) => state.setPermissions);
   const showToast = useToastStore((state) => state.showToast);
 
   // Form State
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [backendError, setBackendError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [passError, setPassError] = useState('');
 
@@ -67,7 +67,6 @@ export const LoginPage = () => {
     // Reset errors
     setPhoneError('');
     setPassError('');
-    setBackendError('');
     let hasError = false;
 
     // Phone Number validation
@@ -94,7 +93,22 @@ export const LoginPage = () => {
       localStorage.removeItem('login_attempts');
       localStorage.removeItem('lockout_end');
       
-      setAuth(res.data.data.access_token, res.data.data.user_role);
+      const token = res.data.data.access_token;
+      const roleSlug = res.data.data.user_role;
+
+      setAuth(token, roleSlug);
+
+      // Fetch user permissions from backend
+      try {
+        const permsRes = await getMyPermissions();
+        const permissions = permsRes.data.data?.permissions || [];
+        setPermissions(permissions);
+      } catch {
+        // Fallback: if permissions cannot be loaded, set empty array
+        setPermissions([]);
+      }
+      
+      showToast("Login successful", "success");
       navigate('/', { replace: true });
     } catch (err: any) {
       const newAttempts = attempts + 1;
@@ -108,7 +122,11 @@ export const LoginPage = () => {
         showToast("Maximum attempts reached", "error");
       } else {
         const errorMsg = err.response?.data?.detail || err.response?.data?.message || "Login Failed";
-        setBackendError(errorMsg);
+        showToast(errorMsg, "error");
+        // Don't count blocked/disabled role as a failed attempt
+        if (err.response?.status === 403) {
+          setAttempts(attempts); // revert increment
+        }
       }
     } finally {
       setLoading(false);
@@ -118,9 +136,6 @@ export const LoginPage = () => {
   return (
     <div className="glass-card">
       <h2>Welcome Back</h2>
-
-      {/* Message for backend errors */}
-      {backendError && <div className="glass-error-msg">{backendError}</div>}
 
       <form onSubmit={handleLogin} noValidate>
         {/* Phone Number Input */}

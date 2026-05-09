@@ -1,0 +1,801 @@
+/* User View Container */
+.user-view-container {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Back Button */
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* margin-bottom: 20px; */
+  position: relative;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+/* User View Layout */
+.user-view-layout {
+  display: grid;
+  grid-template-columns: 25% 75%;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Cards Section */
+.user-cards-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 100px;
+}
+
+/* Profile Card */
+.profile-card {
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  border-color: rgba(124, 77, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(124, 77, 255, 0.15);
+}
+
+.profile-card.kitchen-card:hover {
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.15);
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.1), rgba(99, 102, 241, 0.1));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kitchen-card .card-header {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(147, 51, 234, 0.1));
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.2), rgba(99, 102, 241, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a78bfa;
+}
+
+.card-icon.kitchen {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.2));
+  color: #c084fc;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* Card Body */
+.card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card Info Row */
+.card-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.info-icon {
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* Card Badge Row */
+.card-badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  border: 1px solid;
+}
+
+.status-badge.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.status-badge.blocked {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.status-badge.inactive {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+  border-color: rgba(156, 163, 175, 0.3);
+}
+
+/* Form Section */
+.user-form-section {
+  width: 100%;
+}
+
+.form-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Form Row for Two Fields */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.form-actions .glass-button {
+  width: auto;
+  min-width: 150px;
+  padding: 12px 32px;
+}
+
+.no-permission-message {
+  padding: 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  color: #f87171;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+/* Tablet Responsive */
+@media (max-width: 1024px) {
+  .user-view-layout {
+    grid-template-columns: 30% 70%;
+  }
+
+  .card-header h3 {
+    font-size: 1rem;
+  }
+
+  .info-value {
+    font-size: 0.9rem;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .user-view-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .user-cards-section {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 10px;
+  }
+
+  .profile-card {
+    min-width: 280px;
+    flex-shrink: 0;
+  }
+
+  .back-button {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .form-title {
+    font-size: 1.3rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions .glass-button {
+    width: 100%;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .profile-card {
+    min-width: 260px;
+  }
+
+  .card-header {
+    padding: 16px;
+  }
+
+  .card-body {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .card-header h3 {
+    font-size: 0.95rem;
+  }
+}
+
+/* ── Address Boxes Row ── */
+.addr-boxes-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 4px 0 8px;
+}
+
+/* Base box */
+.addr-box {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s ease;
+  min-height: 110px;
+  width: calc(33.333% - 8px);
+  box-sizing: border-box;
+}
+
+/* Empty — clickable */
+.addr-box--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border-style: dashed;
+}
+
+.addr-box--empty:hover {
+  border-color: rgba(124, 77, 255, 0.4);
+  background: rgba(124, 77, 255, 0.05);
+}
+
+.addr-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.addr-add-text {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.addr-box--empty:hover .addr-add-btn {
+  background: rgba(124, 77, 255, 0.2);
+  border-color: rgba(124, 77, 255, 0.5);
+  color: #a78bfa;
+}
+
+.addr-box--empty:hover .addr-add-text {
+  color: #a78bfa;
+}
+
+/* Filled address box */
+.addr-box--filled {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  position: relative;
+}
+
+.addr-box--filled:hover {
+  border-color: rgba(124, 77, 255, 0.35);
+  background: rgba(124, 77, 255, 0.05);
+}
+
+/* Delete button — hidden, shown on hover */
+.addr-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+
+.addr-box--filled:hover .addr-delete-btn {
+  opacity: 1;
+}
+
+.addr-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.addr-box-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: #a78bfa;
+  background: rgba(124, 77, 255, 0.15);
+  border: 1px solid rgba(124, 77, 255, 0.3);
+  padding: 2px 8px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.addr-box-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.addr-icon-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.addr-icon-btn.map:hover { background: rgba(99, 102, 241, 0.2); border-color: rgba(99,102,241,0.4); color: #818cf8; }
+.addr-icon-btn.del:hover { background: rgba(239, 68, 68, 0.15); border-color: rgba(239,68,68,0.35); color: #f87171; }
+
+.addr-box-photo {
+  width: 100%;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.addr-box-text {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+  margin: 0;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.addr-box-meta {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Expanded form box — full width */
+.addr-box--expanded {
+  width: 100%;
+  padding: 16px;
+  border-color: rgba(124, 77, 255, 0.3);
+  background: rgba(124, 77, 255, 0.04);
+  min-height: unset;
+}
+
+.addr-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+/* Textarea — floating label pattern matching glass-input */
+.addr-textarea-wrap {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.addr-textarea {
+  width: 100%;
+  padding: 1.2rem;
+  background: transparent;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  border-radius: 16px;
+  color: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 3.8rem; /* ~2 rows */
+  outline: none;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.addr-textarea::placeholder { color: transparent; }
+.addr-textarea:focus { border-color: var(--primary-glow, rgba(124, 77, 255, 0.6)); }
+
+.addr-textarea-label {
+  position: absolute;
+  left: 1.2rem;
+  top: 1.2rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  color: var(--text-muted, rgba(255, 255, 255, 0.45));
+  font-size: 1rem;
+  z-index: 5;
+}
+
+.addr-textarea:focus ~ .addr-textarea-label,
+.addr-textarea:not(:placeholder-shown) ~ .addr-textarea-label {
+  top: -0.7rem;
+  left: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-glow, rgba(124, 77, 255, 0.9));
+  background: #090909;
+  padding: 2px 7px;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* Photo upload — square box at top of form */
+.addr-photo-uploader {
+  width: 180px;
+  height: 90px;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition: border-color 0.2s ease;
+  display: flex;
+  justify-content: center;
+}
+
+.addr-photo-uploader:hover {
+  border-color: rgba(124, 77, 255, 0.5);
+}
+
+.addr-photo-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.88rem;
+}
+
+.addr-photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Label selector */
+.addr-label-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.addr-label-opt {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+}
+
+.addr-label-opt:hover {
+  border-color: rgba(124, 77, 255, 0.4);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.addr-label-opt.active {
+  background: rgba(124, 77, 255, 0.2);
+  border-color: rgba(124, 77, 255, 0.5);
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+/* Label badge on filled boxes */
+.address-label-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: rgba(124, 77, 255, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(124, 77, 255, 0.3);
+}
+
+/* Form actions inside address box */
+.addr-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.addr-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: auto !important;
+  min-width: 120px;
+  padding: 10px 20px !important;
+  font-size: 0.88rem;
+}
+
+.glass-button.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.glass-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .addr-box {
+    width: calc(50% - 6px);
+  }
+
+  .addr-box--expanded {
+    width: 100%;
+  }
+
+  .addr-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .addr-form-actions {
+    flex-direction: column;
+  }
+
+  .addr-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .addr-boxes-row {
+    gap: 8px;
+  }
+
+  .addr-box {
+    width: 100%;
+  }
+
+  .addr-box--expanded {
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  .addr-label-selector {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+/* Profile page — same layout as user view, stacked forms */
+.profile-form-stack,
+.user-view-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.profile-page .profile-city-row,
+.profile-page .profile-kitchen-name-row,
+.user-view-container .profile-kitchen-name-row {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.profile-page .kitchen-toggle,
+.user-view-container .kitchen-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0.5rem 0 1.25rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.profile-page .kitchen-toggle input,
+.user-view-container .kitchen-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #a78bfa;
+  cursor: pointer;
+}
+
+.profile-password-note {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+/* Password row: two fields + button */
+.form-row--password-inline {
+  display: grid;
+  grid-template-columns: 1fr 1fr minmax(120px, 160px);
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 0;
+}
+
+.form-row--password-inline .input-container {
+  margin-bottom: 0;
+}
+
+.form-row--password-inline__btn {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .form-row--password-inline {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row--password-inline__btn {
+    min-height: 52px;
+  }
+}
+
+/* Kitchen status toggle — sits inline next to kitchen name in form-row */
+.kitchen-status-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding-bottom: 2rem; /* matches input-container margin-bottom */
+}
+
+.kitchen-status-wrap .toggle-option {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+}
+
+/* Top bar with back + action buttons */
+.user-view-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.user-view-top-bar .back-button {
+  margin-bottom: 0;
+}

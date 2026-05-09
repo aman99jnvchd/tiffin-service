@@ -72,3 +72,24 @@ async def get_my_vendor_profile(
         )
         
     return ApiResponse(status=200, message="Profile fetched", data=vendor)
+
+
+@router.get("/vendors", response_model=ApiResponse)
+async def get_all_vendors(db: Session = Depends(get_db)):
+    """Public endpoint — returns all vendor profiles with kitchen info and city."""
+    vendors = db.query(VendorProfile).all()
+    data = []
+    for v in vendors:
+        data.append({
+            "id": v.id,
+            "kitchen_name": v.kitchen_name,
+            "is_open": v.is_open,
+            "open_time": v.open_time.strftime("%H:%M") if v.open_time else None,
+            "close_time": v.close_time.strftime("%H:%M") if v.close_time else None,
+            "meal_count": len(v.meals),
+            "city": {
+                "id": v.owner.city.id,
+                "name": v.owner.city.name,
+            } if v.owner and v.owner.city else None,
+        })
+    return ApiResponse(status=200, message="Vendors fetched", data=data)

@@ -31,6 +31,23 @@
   padding-right: 5px;
 }
 
+/* Grouped sections for permissions modal */
+.permissions-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.permissions-group-title {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* Custom Checkbox Tile */
 .perm-checkbox {
   display: flex;
@@ -86,4 +103,64 @@
 .perm-name {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.8);
+}
+
+/* Clickable permissions text in table / cards */
+.permissions-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #60a5fa;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.permissions-link.empty {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.permissions-link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+/* Non-clickable permissions text (when user doesn't have permission) */
+.permissions-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.permissions-subtitle {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Mobile: Hide table, show cards */
+@media (max-width: 768px) {
+  .table-card {
+    display: none;
+  }
+}
+
+/* Admin role — read-only permission tile (no checkbox, no hover interaction) */
+.perm-checkbox.perm-readonly {
+  cursor: default;
+  pointer-events: none;
+}
+
+.perm-checkbox.perm-readonly:hover {
+  background: rgba(124, 77, 255, 0.15);
+}
+
+.admin-role-note {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 400;
+  margin-left: 4px;
 }

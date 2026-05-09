@@ -56,6 +56,7 @@ class Profile(Base):
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
     city_id = Column(Integer, ForeignKey("cities.id"))
     hashed_password = Column(String(255), nullable=False)
+    is_blocked = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
@@ -87,6 +88,9 @@ class Meal(Base):
     vendor_id = Column(Integer, ForeignKey("vendor_profiles.id"))
     name = Column(String(150), nullable=False)
     base_price = Column(Numeric(precision=10, scale=2), nullable=False)
+    description = Column(Text, nullable=True)
+    image_url = Column(String(255), nullable=True)
+    schedule_days = Column(String(50), nullable=True)  # e.g. "Mon,Wed,Fri" or null = daily
     is_always_available = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
 
@@ -113,6 +117,7 @@ class Address(Base):
     label = Column(String(50), default="home")
     address_text = Column(String(500), nullable=False)
     house_no = Column(String(50))
+    pincode = Column(String(10), nullable=True)
     house_photo_url = Column(String(255), nullable=True)
     google_maps_url = Column(String(255), nullable=True)
 

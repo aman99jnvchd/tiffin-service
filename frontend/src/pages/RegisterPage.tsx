@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCities, registerUser } from '../api/axios';
+import { getCities, registerUser, getMyPermissions } from '../api/axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlassInput } from '../components/GlassInput';
 import { GlassSelect } from '../components/GlassSelect'; // Imported your new component
@@ -10,13 +10,14 @@ import { useToastStore } from '../store/useToastStore';
 export const RegisterPage = () => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth); 
+  const setPermissions = useAuthStore((state) => state.setPermissions);
   const showToast = useToastStore((state) => state.showToast);
 
   const [cities, setCities] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    role: 'customer',
+    role_id: 2,
     city_id: '',
     password: '',
     confirmPassword: ''
@@ -31,7 +32,6 @@ export const RegisterPage = () => {
   });
   
   const [loading, setLoading] = useState(false);
-  const [backendError, setBackendError] = useState('');
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -59,7 +59,6 @@ export const RegisterPage = () => {
     e.preventDefault();
     
     setErrors({ name: '', phone: '', city: '', password: '', confirmPassword: '' });
-    setBackendError('');
 
     let hasError = false;
     const newErrors = { name: '', phone: '', city: '', password: '', confirmPassword: '' };
@@ -120,6 +119,16 @@ export const RegisterPage = () => {
       if (authData && authData.access_token) {
         showToast('Successfully Registered', 'success');
         setAuth(authData.access_token, authData.user_role);
+
+        // Fetch user permissions from backend
+        try {
+          const permsRes = await getMyPermissions();
+          const permissions = permsRes.data.data?.permissions || [];
+          setPermissions(permissions);
+        } catch {
+          setPermissions([]);
+        }
+        
         navigate('/', { replace: true });
       } else {
         showToast('Account created! Please login', 'success');
@@ -127,7 +136,7 @@ export const RegisterPage = () => {
       }
     } catch (err: any) {
       const errorMsg = err.response?.data?.detail || "Registration Failed";
-      setBackendError(errorMsg);
+      showToast(errorMsg, "error");
     } finally {
       setLoading(false);
     }
@@ -137,9 +146,6 @@ export const RegisterPage = () => {
     <div className="glass-card">
       <h2>Create Your Account</h2>
 
-      {/* Message for backend errors */}
-      {backendError && <div className="glass-error-msg">{backendError}</div>}
-
       <form onSubmit={handleRegister} noValidate>
         {/* Role Toggle - Customer/Vendor */}
         <div className="role-toggle-container">
@@ -147,7 +153,7 @@ export const RegisterPage = () => {
             className="role-slider-blob"
             initial={false}
             animate={{
-              left: formData.role === 'customer' ? '4px' : '51%',
+              left: formData.role_id === 2 ? '4px' : '51%',
               width: 'calc(50% - 8px)',
             }}
             transition={{
@@ -160,15 +166,15 @@ export const RegisterPage = () => {
 
           <button 
             type="button"
-            className={`role-btn ${formData.role === 'customer' ? 'active' : ''}`}
-            onClick={() => setFormData({...formData, role: 'customer'})}
+            className={`role-btn ${formData.role_id === 2 ? 'active' : ''}`}
+            onClick={() => setFormData({...formData, role_id: 2})}
           >
             Customer
           </button>
           <button 
             type="button"
-            className={`role-btn ${formData.role === 'vendor' ? 'active' : ''}`}
-            onClick={() => setFormData({...formData, role: 'vendor'})}
+            className={`role-btn ${formData.role_id === 3 ? 'active' : ''}`}
+            onClick={() => setFormData({...formData, role_id: 3})}
           >
             Vendor
           </button>

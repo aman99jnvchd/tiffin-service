@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export const GlassSelect = ({ label, options, value, onChange, errorMessage }: any) => {
+export const GlassSelect = ({ label, options, value, onChange, errorMessage, disabled }: any) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -21,8 +21,9 @@ export const GlassSelect = ({ label, options, value, onChange, errorMessage }: a
     <div className="glass-input-wrapper" ref={containerRef}>
       {/* Select Header: Shows selected option or placeholder. */}
       <div 
-        className={`glass-select-header ${isOpen ? 'active' : ''} ${value ? 'has-value' : ''} ${errorMessage ? 'error' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
+        className={`glass-select-header ${isOpen ? 'active' : ''} ${value ? 'has-value' : ''} ${errorMessage ? 'error' : ''} ${disabled ? 'glass-select-disabled' : ''}`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        aria-disabled={disabled ? true : undefined}
       >
         <span className="selected-text">{selectedOption ? selectedOption.name : ""}</span>
         <motion.span animate={{ rotate: isOpen ? 180 : 0 }} className="select-arrow">▼</motion.span>

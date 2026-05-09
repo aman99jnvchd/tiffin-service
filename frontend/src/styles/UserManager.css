@@ -1,0 +1,138 @@
+/* User Type Badges */
+.type-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  border: 1px solid;
+}
+
+.type-badge.customer {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.type-badge.vendor {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.type-badge.admin {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Status Pills - Blocked State */
+.status-pill.blocked {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Status pill shimmer effect on hover */
+.status-pill.clickable {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-pill.clickable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+
+/* View Button Styling */
+.action-btn {
+  position: relative;
+  cursor: pointer;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  font-weight: 500;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.action-btn .btn-text {
+  padding: 0 6px 0 10px;
+  transition: all 0.3s;
+  display: inline-block;
+  z-index: 1;
+  position: relative;
+}
+
+.action-btn .btn-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  flex-shrink: 0;
+  z-index: 1;
+  border-radius: 999px;
+  position: relative;
+}
+
+.action-btn .btn-icon svg {
+  color: #60a5fa;
+  stroke: #60a5fa;
+}
+
+.action-btn.view {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn.view:hover {
+  color: white;
+  border-color: white;
+}
+
+.action-btn.view:hover .btn-icon svg {
+  color: white;
+  stroke: white;
+}
+
+.action-btn.view .btn-decor {
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+  z-index: 0;
+}
+
+.action-btn.view:hover .btn-decor {
+  transform: translateX(100%);
+}
+
+.action-btn.view .btn-text,
+.action-btn.view .btn-icon {
+  z-index: 1;
+  position: relative;
+}
+
+.action-btn.view .btn-icon {
+  /* background: #60a5fa; */
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .type-badge {
+    font-size: 0.75rem;
+    padding: 5px 12px;
+  }
+}

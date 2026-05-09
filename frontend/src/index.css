@@ -242,6 +242,25 @@ a:hover {
   border-color: var(--primary-glow);
 }
 
+/* Time inputs: hide native --:-- until focused or a value is chosen (pairs with floating label) */
+.glass-input.glass-input--time[data-empty="true"]:not(:focus) {
+  color: transparent;
+}
+.glass-input.glass-input--time[data-empty="true"]:not(:focus)::-webkit-datetime-edit {
+  opacity: 0;
+}
+.glass-input.glass-input--time[data-empty="true"]:not(:focus)::-webkit-datetime-edit-fields-wrapper {
+  opacity: 0;
+}
+.glass-input.glass-input--time:focus,
+.glass-input.glass-input--time:not([data-empty="true"]) {
+  color: #fff;
+}
+.glass-input.glass-input--time:focus::-webkit-datetime-edit,
+.glass-input.glass-input--time:not([data-empty="true"])::-webkit-datetime-edit {
+  opacity: 1;
+}
+
 .floating-label {
   position: absolute;
   left: 1.2rem;
@@ -563,6 +582,11 @@ a:hover {
   z-index: 10;
 }
 
+.glass-select-header.glass-select-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .glass-select-header {
   width: 100%;
   padding: 1.2rem 1.01rem;
@@ -600,7 +624,7 @@ a:hover {
   position: absolute;
   top: 100%;
   width: 100%;
-  background: #0a0a0af0;
+  background: #0a0a0a;
   backdrop-filter: blur(50px);
   border: 1px solid #ffffff1a;
   border-radius: 7px;
@@ -637,6 +661,6 @@ a:hover {
 }
 
 
-.background-layer {
+/* .background-layer {
   display: none;
-}
+} */

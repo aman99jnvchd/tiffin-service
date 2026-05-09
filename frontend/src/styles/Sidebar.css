@@ -28,18 +28,12 @@
   padding: 2rem 1.5rem;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   font-weight: 700;
   font-size: 1.2rem;
   color: #fff;
-}
-
-.logo-icon {
-  width: 35px;
-  height: 35px;
-  background: linear-gradient(135deg, #7c4dff, #448aff);
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(124, 77, 255, 0.4);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* Navigation Links */

@@ -1,7 +1,8 @@
 .topbar {
   position: fixed;
   top: 11px;
-  right: 11px;
+  left: 50%;
+  transform: translateX(-50%) !important;
   height: 60px;
   background: #0f0f0fb3;
   backdrop-filter: blur(25px) saturate(180%);
@@ -90,25 +91,31 @@
   top: 52px;
   width: 180px;
   backdrop-filter: blur(50px);
-  background: #0a0a0ae0;
+  background: #0a0a0afe;
 }
 .profile-section .glass-option.logout {
   color: var(--error-red);
 }
 
-/* Desktop */
-@media (min-width: 1025px) {
+/* Large Desktop - 75% width */
+@media (min-width: 1441px) {
   .topbar { 
-    left: calc(270px + 11px);
-    width: auto;
-    min-width: 400px;
+    width: 75%;
+    max-width: 1400px;
   }
 }
 
-/* Tablet */
+/* Desktop - 80% width */
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .topbar { 
+    width: 80%;
+  }
+}
+
+/* Tablet - 90% width */
 @media (min-width: 768px) and (max-width: 1024px) {
   .topbar { 
-    left: calc(90px + 11px); 
+    width: 90%;
     padding: 0 17px;
   }
 
@@ -118,11 +125,10 @@
   }
 }
 
-/* Mobile */
+/* Mobile - 100% width with padding */
 @media (max-width: 767px) {
   .topbar { 
-    left: 11px;
-    right: 11px;
+    width: calc(100% - 22px);
     height: 54px;
     padding: 0 13px 0 18px;
   }

@@ -7,6 +7,7 @@ interface Props {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   errorMessage?: string;
   maxLength?: number;
+  disabled?: boolean;
 }
 
 export const GlassInput = ({ 
@@ -16,6 +17,7 @@ export const GlassInput = ({
   onChange, 
   errorMessage, 
   maxLength, 
+  disabled,
 }: Props) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -33,10 +35,12 @@ export const GlassInput = ({
         value={value}
         onChange={onChange}
         maxLength={maxLength}
+        disabled={disabled}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className={`glass-input ${isError ? 'input-error' : ''}`}
+        className={`glass-input ${type === 'time' ? 'glass-input--time' : ''} ${isError ? 'input-error' : ''} ${disabled ? 'input-disabled' : ''}`}
         placeholder=" "
+        data-empty={type === 'time' && !value ? 'true' : undefined}
       />
 
       {/* Label floats if focused OR has value */}

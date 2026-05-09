@@ -58,6 +58,10 @@ def update_role(role_id: int, role_in: RoleUpdate, db: Session = Depends(get_db)
     if role.slug in ['admin', 'customer', 'vendor'] and role_in.slug and role_in.slug != role.slug:
         raise HTTPException(status_code=400, detail="Cannot change slug of system roles")
 
+    # Prevent disabling system roles (id 1, 2, 3)
+    if role.id in (1, 2, 3) and role_in.is_active is False:
+        raise HTTPException(status_code=400, detail="System roles cannot be disabled")
+
     # Update basic fields
     if role_in.name: role.name = role_in.name
     if role_in.slug: role.slug = role_in.slug

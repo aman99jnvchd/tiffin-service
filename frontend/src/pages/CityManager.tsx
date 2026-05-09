@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlassInput } from '../components/GlassInput';
+import { Building2, Plus, Edit } from "lucide-react";
 import { getCities, addCity, updateCity, toggleCityStatus } from '../api/axios';
 import { useToastStore } from '../store/useToastStore';
+import { usePermissions } from '../hooks/usePermissions';
+import { CardView } from '../components/CardView';
 import '../styles/CityManager.css';
+import '../styles/CardView.css';
 
 export const CityManager = () => {
   const [cities, setCities] = useState([]);
@@ -18,13 +22,23 @@ export const CityManager = () => {
   const [formData, setFormData] = useState({ name: '', slug: '', is_active: true });
 
   const showToast = useToastStore((state) => state.showToast);
+  const { hasPermission } = usePermissions();
+
+  // Permission checks
+  const canView = hasPermission('city:view');
+  const canCreate = hasPermission('city:create');
+  const canUpdate = hasPermission('city:update');
+  const canToggleStatus = hasPermission('city:toggle_status');
 
   // Initial Fetch
   useEffect(() => {
-    fetchCities();
-  }, []);
+    if (canView) {
+      fetchCities();
+    }
+  }, [canView]);
 
   const fetchCities = async () => {
+    if (!canView) return;
     try {
       const res = await getCities();
       setCities(res.data.data);
@@ -35,6 +49,10 @@ export const CityManager = () => {
 
   // Open Modal (Add Mode)
   const openAddModal = () => {
+    if (!canCreate) {
+      showToast("You don't have permission to add cities", "error");
+      return;
+    }
     setEditingId(null);
     setFormData({ name: '', slug: '', is_active: true });
     setIsModalOpen(true);
@@ -42,6 +60,10 @@ export const CityManager = () => {
 
   // Open Modal (Edit Mode)
   const openEditModal = (city: any) => {
+    if (!canUpdate) {
+      showToast("You don't have permission to update cities", "error");
+      return;
+    }
     setEditingId(city.id);
     setFormData({ 
       name: city.name, 
@@ -85,6 +107,11 @@ export const CityManager = () => {
 
   // Handle Status Toggle (Directly from Table)
   const handleToggle = async (cityId: number) => {
+    if (!canToggleStatus) {
+      showToast("You don't have permission to change city status", "error");
+      return;
+    }
+    
     if (togglingId === cityId) return;
 
     setTogglingId(cityId);
@@ -101,18 +128,23 @@ export const CityManager = () => {
 
   return (
     <div className="city-manager-container">
-      {/* Header Section */}
-      <div className="page-header">
-        <div className="info">
-          <h2 className="page-title-large">City Management</h2>
-          <p className="page-subtitle">Manage delivery locations and their availability</p>
+      {/* Add Button Container - Only show if user can create */}
+      {canCreate && (
+        <div className="add-button-container">
+          <button 
+            className="add-btn"
+            onClick={openAddModal}
+          >
+            <span className="btn-decor"></span>
+            <span className="btn-text">Add City</span>
+            <span className="btn-icon">
+              <Plus size={18} strokeWidth={2} />
+            </span>
+          </button>
         </div>
-        <button className="glass-button primary-btn compact-btn" onClick={openAddModal}>
-          Add City
-        </button>
-      </div>
+      )}
 
-      {/* Glass Table */}
+      {/* Glass Table (Desktop) */}
       <div className="glass-card table-card">
         <div className="table-responsive">
           <table className="glass-table">
@@ -122,7 +154,7 @@ export const CityManager = () => {
                 <th>City Name</th>
                 <th>Slug</th>
                 <th>Status</th>
-                <th className="text-right">Actions</th>
+                {canUpdate && <th className="text-right">Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -134,39 +166,86 @@ export const CityManager = () => {
                   
                   {/* Status Column with Interactive Pill */}
                   <td>
-                    <button 
-                      className={`status-pill clickable ${city.is_active ? 'active' : 'inactive'}`}
-                      onClick={() => handleToggle(city.id)}
-                      disabled={togglingId === city.id}
-                      title="Tap to toggle availability"
-                    >
-                      {togglingId === city.id ? (
-                        <span className="spinner-pill"></span>
-                      ) : (
-                        city.is_active ? 'Available' : 'Unavailable'
-                      )}
-                    </button>
+                    {canToggleStatus ? (
+                      <button 
+                        className={`status-pill clickable ${city.is_active ? 'active' : 'inactive'}`}
+                        onClick={() => handleToggle(city.id)}
+                        disabled={togglingId === city.id}
+                        title="Tap to toggle availability"
+                      >
+                        {togglingId === city.id ? (
+                          <span className="spinner-pill"></span>
+                        ) : (
+                          city.is_active ? 'Available' : 'Unavailable'
+                        )}
+                      </button>
+                    ) : (
+                      <span className={`status-pill ${city.is_active ? 'active' : 'inactive'}`}>
+                        {city.is_active ? 'Available' : 'Unavailable'}
+                      </span>
+                    )}
                   </td>
 
-                  <td className="actions-col">
-                    <button 
-                      className="action-btn edit"
-                      onClick={() => openEditModal(city)}
-                    >
-                      Update
-                    </button>
-                  </td>
+                  {canUpdate && (
+                    <td className="actions-col">
+                      <button 
+                        className="action-btn edit"
+                        onClick={() => openEditModal(city)}
+                      >
+                        <span className="btn-text">Update</span>
+                        <span className="btn-icon">
+                          <Edit size={16} strokeWidth={2} />
+                        </span>
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
               {cities.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="empty-state">No cities found. Add one to get started.</td>
+                  <td colSpan={canUpdate ? 5 : 4} className="empty-state">No cities found. {canCreate ? 'Add one to get started.' : ''}</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Card View (Mobile) */}
+      <CardView
+        data={cities}
+        columns={[
+          { key: 'name', label: 'City Name' },
+          { key: 'alias', label: 'Slug', render: (val) => val || <span className="text-muted">-</span> },
+          { 
+            key: 'is_active', 
+            label: 'Status',
+            render: (val, city: any) => (
+              canToggleStatus ? (
+                <button 
+                  className={`status-pill clickable ${city.is_active ? 'active' : 'inactive'}`}
+                  onClick={() => handleToggle(city.id)}
+                  disabled={togglingId === city.id}
+                  title="Tap to toggle availability"
+                >
+                  {togglingId === city.id ? (
+                    <span className="spinner-pill"></span>
+                  ) : (
+                    city.is_active ? 'Available' : 'Unavailable'
+                  )}
+                </button>
+              ) : (
+                <span className={`status-pill ${city.is_active ? 'active' : 'inactive'}`}>
+                  {city.is_active ? 'Available' : 'Unavailable'}
+                </span>
+              )
+            )
+          }
+        ]}
+        expandedColumns={[]}
+        onEdit={canUpdate ? openEditModal : undefined}
+        emptyMessage={`No cities found. ${canCreate ? 'Add one to get started.' : ''}`}
+      />
 
       {/* Add/Edit Modal */}
       <AnimatePresence>
@@ -183,7 +262,10 @@ export const CityManager = () => {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="glass-modal"
             >
-              <h3>{editingId ? 'Update City' : 'Add City'}</h3>
+              <h3>
+                <Building2 size={22} />
+                {editingId ? 'Update City' : 'Add City'}
+              </h3>
               <form onSubmit={handleSave}>
                 <GlassInput 
                   label="City Name" 
@@ -208,23 +290,25 @@ export const CityManager = () => {
                   }}
                 />
                 
-                {/* Custom Status Toggle Switch */}
-                <div className="status-toggle-container">
-                  <button
-                    type="button"
-                    className={`toggle-option ${formData.is_active ? 'green-active' : 'grey'}`}
-                    onClick={() => setFormData({...formData, is_active: true})}
-                  >
-                    Available
-                  </button>
-                  <button
-                    type="button"
-                    className={`toggle-option ${!formData.is_active ? 'red-active' : 'grey'}`}
-                    onClick={() => setFormData({...formData, is_active: false})}
-                  >
-                    Unavailable
-                  </button>
-                </div>
+                {/* Custom Status Toggle Switch - Only show if user has toggle permission */}
+                {canToggleStatus && (
+                  <div className="status-toggle-container">
+                    <button
+                      type="button"
+                      className={`toggle-option ${formData.is_active ? 'green-active' : 'grey'}`}
+                      onClick={() => setFormData({...formData, is_active: true})}
+                    >
+                      Available
+                    </button>
+                    <button
+                      type="button"
+                      className={`toggle-option ${!formData.is_active ? 'red-active' : 'grey'}`}
+                      onClick={() => setFormData({...formData, is_active: false})}
+                    >
+                      Unavailable
+                    </button>
+                  </div>
+                )}
 
                 <div className="modal-actions">
                   <button type="button" className="glass-button secondary" onClick={() => setIsModalOpen(false)}>

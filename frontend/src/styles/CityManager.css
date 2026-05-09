@@ -5,32 +5,7 @@
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 2rem;
-  flex-wrap: wrap; /* Allows wrapping on small screens */
-  gap: 1rem;
-}
-
-.page-header .info {
-  position: relative;
-}
-
-.page-title-large {
-  font-size: 1.8rem;
-  margin: 0 0 5px 0;
-  color: #ffffff; 
-  font-weight: 700;
-  opacity: 1; 
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
-
-.page-subtitle {
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 400;
+  display: none; /* Hide header, add button moved to cards container */
 }
 
 /* Compact Add Button */
@@ -112,11 +87,26 @@
 .status-pill.clickable {
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.status-pill.clickable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+
+.status-pill.clickable:hover::before {
+  transform: translateX(100%);
 }
 
 .status-pill.clickable:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  color: white;
+  border-color: white;
 }
 
 .status-pill.active {
@@ -147,41 +137,154 @@
   100% { transform: rotate(360deg); }
 }
 
-/* --- Action Buttons --- */
+/* --- Action Buttons with Icons --- */
 .actions-col {
   text-align: right;
   white-space: nowrap;
 }
 
 .action-btn {
-  background: none;
-  border: none;
+  position: relative;
   cursor: pointer;
   font-size: 0.85rem;
-  padding: 6px 12px;
   border-radius: 999px;
-  transition: all 0.2s;
-  margin-left: 8px;
   font-weight: 500;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s;
+}
+.action-btn:hover {
+  color: white !important;
+  border-color: white !important;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #ffffff4d, transparent);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+.action-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.action-btn .btn-text {
+  padding: 0 6px 0 10px;
+  transition: all 0.3s;
+  display: inline-block;
+  z-index: 1;
+}
+
+.action-btn .btn-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  flex-shrink: 0;
+  z-index: 1;
+  border-radius: 999px;
+}
+
+.action-btn:hover .btn-icon svg {
+  color: white;
+  stroke: white;
 }
 
 .action-btn.edit {
-  color: #60a5fa; /* Blue */
-  background: rgba(96, 165, 250, 0.1);
-  border: 1px solid rgba(96, 165, 250, 0.2);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
 }
-.action-btn.edit:hover { background: rgba(96, 165, 250, 0.2); }
 
-/* --- Buttons --- */
-.primary-btn {
-  background: linear-gradient(135deg, #7c4dff, #6366f1);
-  border: none;
-  color: white;
-  box-shadow: 0 4px 15px rgba(124, 77, 255, 0.4);
+
+/* Add Button with Icon */
+.add-btn {
+  position: relative;
+  background: linear-gradient(135deg, #7c4dff1a, #6366f11a);
+  border: 1px solid #7c4dff4d;
+  color: #a78bfa;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  font-weight: 600;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s;
 }
-.primary-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 77, 255, 0.6);
+.add-btn:hover {
+  color: white;
+  border-color: white;
+}
+
+.add-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #ffffff4d, transparent);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+.add-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.add-btn .btn-text {
+  /* padding: 0 10px 0 15px; */
+  padding: 0 0 0 15px;
+  transition: all 0.3s;
+  display: inline-block;
+  z-index: 1;
+}
+
+.add-btn .btn-icon {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  flex-shrink: 0;
+  color: white;
+  z-index: 1;
+  border-radius: 999px;
+}
+
+.add-btn .btn-icon svg {
+  color: #a78bfa;
+  stroke: #a78bfa;
+}
+.add-btn:hover .btn-icon svg {
+  color: white;
+  stroke: white;
+}
+
+/* Mobile: Show icon only */
+@media (max-width: 768px) {
+  .action-btn .btn-text {
+    display: none;
+  }
+  .action-btn .btn-icon {
+    border-radius: 999px;
+  }
+  .add-btn .btn-text {
+    display: none;
+  }
+}
+
+/* Add Button Container - Outside table and cards */
+.add-button-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 /* --- Modal Styling --- */
@@ -212,6 +315,12 @@
   margin-bottom: 2.5rem;
   color: #fff;
   font-size: 1.25rem;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+.glass-modal h3 svg {
+  margin-right: 10px;
 }
 
 .glass-modal .floating-label.active {
@@ -276,9 +385,9 @@
 }
 
 .empty-state {
-  text-align: center;
+  text-align: center !important;
   padding: 3rem !important;
-  color: rgba(255,255,255,0.4);
+  color: #ffffff66 !important;
 }
 
 /* --- MOBILE RESPONSIVENESS (320px - 768px) --- */
@@ -300,5 +409,10 @@
   
   .glass-table th, .glass-table td {
     padding: 1rem 1rem; /* Reduces padding to fit more data */
+  }
+  
+  /* Hide table on mobile, show cards */
+  .table-card {
+    display: none;
   }
 }
