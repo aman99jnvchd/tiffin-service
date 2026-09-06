@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 
 from .db.session import engine
 from .models import models
-from .api import meals, admin, vendors, auth, orders, addresses, uploads, users
+from .api import meals, admin, vendors, auth, orders, addresses, uploads, users, categories, subscriptions, wallet
 
 # Initialize Database Tables
 try:
@@ -16,7 +16,7 @@ except Exception as e:
     print(f"❌ Database connection failed: {e}")
 
 app = FastAPI(
-    title="Tiffin Service API",
+    title="Tiffni API",
     version="1.0.0",
     description="Backend for localized tiffin delivery service"
 )
@@ -68,8 +68,11 @@ app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 app.include_router(admin.router, prefix="/api/v1", tags=["Admin"])
 app.include_router(vendors.router, prefix="/api/v1", tags=["Vendors"])
 app.include_router(meals.router, prefix="/api/v1", tags=["Meals"])
+app.include_router(categories.router, prefix="/api/v1", tags=["Categories"])
 app.include_router(addresses.router, prefix="/api/v1", tags=["Addresses"])
 app.include_router(orders.router, prefix="/api/v1", tags=["Orders"])
+app.include_router(subscriptions.router, prefix="/api/v1", tags=["Subscriptions"])
+app.include_router(wallet.router, prefix="/api/v1", tags=["Wallet"])
 app.include_router(uploads.router, prefix="/api/v1", tags=["Uploads"])
 app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 

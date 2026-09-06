@@ -1,0 +1,288 @@
+
+/* ── Bottom Sheet Container ── */
+.mdm-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  background: #111111;
+  border-radius: 24px 24px 0 0;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.6);
+  margin-bottom: 0 !important;
+  /* Ensure flush bottom */
+}
+
+@media (min-width: 768px) {
+  .mdm-sheet {
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 500px;
+    border-radius: 24px 24px 0 0;
+  }
+}
+
+/* Pull Indicator */
+.mdm-pull-bar {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 16px auto;
+  flex-shrink: 0;
+}
+
+.mdm-pull-bar:hover {
+  cursor: grab;
+}
+
+/* ── Scrollable Content ── */
+.mdm-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.mdm-scroll-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Content Body ── */
+.mdm-body {
+  padding: 0 20px 16px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Nested Cards ── */
+.mdm-nested-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.mdm-nested-card:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Card 1: Meal Information ── */
+.mdm-hero-image-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.mdm-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mdm-hero-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1c1c2e 0%, #16213e 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+}
+
+.mdm-nested-card-content {
+  padding: 16px;
+}
+
+/* Meal Info details inside Card 1 */
+.mdm-meal-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+/* Standard Indian dietary icon */
+.mdm-dietary-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mdm-dietary-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.mdm-meal-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 4px 0 0 0;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.mdm-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Card 2: Vendor & Availability ── */
+.mdm-vendor-details {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mdm-vendor-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mdm-vendor-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(124, 77, 255, 0.18);
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mdm-vendor-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.mdm-schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mdm-schedule-icon {
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+}
+
+.mdm-schedule-text {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Service Type Chips */
+.mdm-service-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.mdm-service-chip {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px 10px;
+}
+
+
+/* ── Sticky Action Bar ── */
+.mdm-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  /* Reduced bottom padding to fix the floating gap */
+  background: rgba(17, 17, 17, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+
+.mdm-price-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mdm-price-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mdm-price-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #4ade80;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.mdm-price-currency {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(74, 222, 128, 0.8);
+}
+
+.mdm-price-per {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: rgba(74, 222, 128, 0.6);
+}
+
+.mdm-schedule-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: #7c4dff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(124, 77, 255, 0.4);
+  white-space: nowrap;
+}
+
+.mdm-schedule-btn:hover {
+  background: #6c3fff;
+  box-shadow: 0 6px 20px rgba(124, 77, 255, 0.55);
+}

@@ -57,12 +57,18 @@ export const UserView = () => {
   const [addrLoading, setAddrLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [confirmDeleteAddrId, setConfirmDeleteAddrId] = useState<number | null>(null);
+  const [activeServiceTab, setActiveServiceTab] = useState<string | null>(null);
 
   const [kitchenForm, setKitchenForm] = useState({
     kitchen_name: '',
     is_open: true,
-    open_time: '',
-    close_time: '',
+    fssai_number: '',
+    dietary_type: '',
+    service_types: [] as string[],
+    delivery_windows: {} as Record<string, any[]>,
+    order_cutoff_hours: 0,
+    max_capacity_per_slot: 0,
   });
   const [kitchenLoading, setKitchenLoading] = useState(false);
 
@@ -79,7 +85,7 @@ export const UserView = () => {
 
   const fetchRoles = async () => {
     try {
-      const res = await getRoles();
+      const res = await getRoles(true); // dropdown should list only active roles
       const list = res.data.data || [];
       setRoleOptions(list.filter((r: any) => r.id !== 1));
     } catch {
@@ -110,11 +116,18 @@ export const UserView = () => {
       });
       if (u.role?.slug === 'vendor' && u.vendor_profile) {
         const vp = u.vendor_profile;
+        let parsedWindows = {};
+        try { parsedWindows = JSON.parse(vp.delivery_windows || '{}'); } catch (e) { }
+        const sTypes = vp.service_types ? vp.service_types.split(',') : [];
         setKitchenForm({
           kitchen_name: vp.kitchen_name || '',
           is_open: !!vp.is_open,
-          open_time: vp.open_time ? vp.open_time.slice(0, 5) : '',
-          close_time: vp.close_time ? vp.close_time.slice(0, 5) : '',
+          fssai_number: vp.fssai_number || '',
+          dietary_type: vp.dietary_type || '',
+          service_types: sTypes,
+          delivery_windows: parsedWindows,
+          order_cutoff_hours: vp.order_cutoff_hours || 0,
+          max_capacity_per_slot: vp.max_capacity_per_slot || 0,
         });
       }
     } catch {
@@ -153,19 +166,22 @@ export const UserView = () => {
     e.preventDefault();
     if (!canEdit) return showToast('No permission to edit users', 'error');
     if (!kitchenForm.kitchen_name.trim()) return showToast('Kitchen name is required', 'error');
+    if (kitchenForm.fssai_number && !/^[1-3](0[1-9]|[12]\d|3[0-6])(0[6-9]|1\d|2[0-6])\d{9}$/.test(kitchenForm.fssai_number)) {
+      return showToast("Invalid FSSAI Registration Number.", "error");
+    }
+
     setKitchenLoading(true);
     try {
-      const body: {
-        kitchen_name: string;
-        is_open: boolean;
-        open_time?: string;
-        close_time?: string;
-      } = {
+      const body = {
         kitchen_name: kitchenForm.kitchen_name.trim(),
         is_open: kitchenForm.is_open,
+        fssai_number: kitchenForm.fssai_number,
+        dietary_type: kitchenForm.dietary_type,
+        service_types: kitchenForm.service_types.join(','),
+        delivery_windows: JSON.stringify(kitchenForm.delivery_windows),
+        order_cutoff_hours: kitchenForm.order_cutoff_hours,
+        max_capacity_per_slot: kitchenForm.max_capacity_per_slot,
       };
-      if (kitchenForm.open_time) body.open_time = `${kitchenForm.open_time}:00`;
-      if (kitchenForm.close_time) body.close_time = `${kitchenForm.close_time}:00`;
       await updateUserVendorProfile(parseInt(userId || '0'), body);
       showToast('Kitchen details updated', 'success');
       await fetchUserDetails();
@@ -306,14 +322,14 @@ export const UserView = () => {
         ) : (
           <span className="addr-photo-placeholder">
             <ImagePlus size={18} />
-            House Image
+            {isVendor ? 'Shop Image' : 'House Image'}
           </span>
         )}
       </div>
 
       <div className="addr-form-row">
         <GlassSelect label="City" options={cities} value={addrForm.city_id} onChange={handleCityChange} />
-        <GlassInput label="House No." value={addrForm.house_no} onChange={(e) => setAddrForm({ ...addrForm, house_no: e.target.value })} />
+        <GlassInput label={isVendor ? 'Shop No.' : 'House No.'} value={addrForm.house_no} onChange={(e) => setAddrForm({ ...addrForm, house_no: e.target.value })} />
       </div>
 
       <div className="addr-textarea-wrap">
@@ -340,39 +356,101 @@ export const UserView = () => {
         />
       </div>
 
-      <div className="addr-label-selector">
-        {ADDR_LABELS.map((lbl) => (
-          <button
-            key={lbl}
-            type="button"
-            className={`addr-label-opt ${addrForm.label === lbl ? 'active' : ''}`}
-            onClick={() => setAddrForm({ ...addrForm, label: lbl })}
-          >
-            {lbl.charAt(0).toUpperCase() + lbl.slice(1)}
-          </button>
-        ))}
-      </div>
+      {!isVendor && (
+        <div className="addr-label-selector">
+          {['home', 'office', 'other'].map((lbl) => (
+            <button
+              key={lbl}
+              type="button"
+              className={`addr-label-opt ${addrForm.label === lbl ? 'active' : ''}`}
+              onClick={() => setAddrForm({ ...addrForm, label: lbl })}
+            >
+              {lbl.charAt(0).toUpperCase() + lbl.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="addr-form-actions">
         <button type="button" className="glass-button secondary addr-btn" onClick={closeForm}>
-          <X size={14} /> Cancel
+          Cancel
         </button>
         <button type="button" className="glass-button primary addr-btn" disabled={addrLoading} onClick={handleSubmitAddress}>
           {addrLoading ? (
             <span className="spinner small"></span>
           ) : activeForm === 'add' ? (
-            <>
-              <Plus size={14} /> Add Address
-            </>
+            'Add Address'
           ) : (
-            <>
-              <Pencil size={14} /> Update
-            </>
+            'Update'
           )}
         </button>
       </div>
     </div>
   );
+
+  const handleAddTimeSlot = (service: string) => {
+    const currentSlots = Array.isArray(kitchenForm.delivery_windows[service]) ? kitchenForm.delivery_windows[service] : [];
+    setKitchenForm({
+      ...kitchenForm,
+      delivery_windows: {
+        ...kitchenForm.delivery_windows,
+        [service]: [...currentSlots, { start_time: "12:00 PM", end_time: "12:30 PM" }]
+      }
+    });
+  };
+
+  const handleRemoveTimeSlot = (service: string, index: number) => {
+    const currentSlots = Array.isArray(kitchenForm.delivery_windows[service]) ? kitchenForm.delivery_windows[service] : [];
+    if (currentSlots.length <= 1) return;
+    const newSlots = [...currentSlots];
+    newSlots.splice(index, 1);
+    setKitchenForm({
+      ...kitchenForm,
+      delivery_windows: {
+        ...kitchenForm.delivery_windows,
+        [service]: newSlots
+      }
+    });
+  };
+
+  const handleTimeSlotChange = (service: string, index: number, field: 'start_time' | 'end_time', rawValue: string) => {
+    const currentSlots = Array.isArray(kitchenForm.delivery_windows[service]) ? kitchenForm.delivery_windows[service] : [];
+    const newSlots = [...currentSlots];
+    
+    const formatTime = (timeValue: string) => {
+      if (!timeValue) return '';
+      const [hourStr, minStr] = timeValue.split(':');
+      let h = parseInt(hourStr);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${h.toString().padStart(2, '0')}:${minStr} ${ampm}`;
+    };
+
+    let updatedSlot = typeof newSlots[index] === 'string' 
+      ? { start_time: newSlots[index], end_time: newSlots[index] } 
+      : { ...newSlots[index] };
+
+    updatedSlot[field] = formatTime(rawValue);
+
+    if (field === 'start_time' && rawValue) {
+      const [h, m] = rawValue.split(':').map(Number);
+      const date = new Date();
+      date.setHours(h, m + 30, 0, 0);
+      const endH = date.getHours().toString().padStart(2, '0');
+      const endM = date.getMinutes().toString().padStart(2, '0');
+      updatedSlot.end_time = formatTime(`${endH}:${endM}`);
+    }
+
+    newSlots[index] = updatedSlot;
+
+    setKitchenForm({
+      ...kitchenForm,
+      delivery_windows: {
+        ...kitchenForm.delivery_windows,
+        [service]: newSlots
+      }
+    });
+  };
 
   return (
     <div className="user-view-container">
@@ -451,19 +529,55 @@ export const UserView = () => {
                     <span className="info-value">{user.vendor_profile.kitchen_name}</span>
                   </div>
                 </div>
+                {(() => {
+                  let parsedWindows: any = {};
+                  try { parsedWindows = JSON.parse(user.vendor_profile.delivery_windows || '{}'); } catch (e) { }
+                  const services = user.vendor_profile.service_types ? user.vendor_profile.service_types.split(',') : [];
+                  return services.map((type: string) => (
+                    <div className="card-info-row" key={type}>
+                      <Clock size={16} className="info-icon" />
+                      <div className="info-content">
+                        <span className="info-label">{type} Windows</span>
+                        <span className="info-value">
+                          {(parsedWindows[type] || [])
+                            .map((w: any) => typeof w === 'string' ? w : `${w.start_time} - ${w.end_time}`)
+                            .join(', ') || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  ));
+                })()}
                 <div className="card-info-row">
-                  <Clock size={16} className="info-icon" />
+                  <Utensils size={16} className="info-icon" />
                   <div className="info-content">
-                    <span className="info-label">Operating Hours</span>
+                    <span className="info-label">Dietary Type</span>
                     <span className="info-value">
-                      {user.vendor_profile.open_time} - {user.vendor_profile.close_time}
+                      {user.vendor_profile.dietary_type === 'Both'
+                        ? 'Both (Veg & Non-Veg)'
+                        : user.vendor_profile.dietary_type || 'N/A'}
                     </span>
                   </div>
                 </div>
-                <div className="card-badge-row">
-                  <span className={`status-badge ${user.vendor_profile.is_open ? 'active' : 'inactive'}`}>
-                    {user.vendor_profile.is_open ? 'Open' : 'Closed'}
-                  </span>
+                <div className="card-info-row">
+                  <Clock size={16} className="info-icon" />
+                  <div className="info-content">
+                    <span className="info-label">Order Cutoff</span>
+                    <span className="info-value">{user.vendor_profile.order_cutoff_hours || 0} hrs before</span>
+                  </div>
+                </div>
+                <div className="card-info-row">
+                  <User size={16} className="info-icon" />
+                  <div className="info-content">
+                    <span className="info-label">Capacity / Slot</span>
+                    <span className="info-value">{user.vendor_profile.max_capacity_per_slot || 0} meals</span>
+                  </div>
+                </div>
+                <div className="card-info-row">
+                  <User size={16} className="info-icon" />
+                  <div className="info-content">
+                    <span className="info-label">FSSAI Number</span>
+                    <span className="info-value">{user.vendor_profile.fssai_number || 'N/A'}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -512,11 +626,22 @@ export const UserView = () => {
                   activeForm === addr.id ? (
                     <React.Fragment key={addr.id}>{AddrForm}</React.Fragment>
                   ) : (
-                    <div key={addr.id} className="addr-box addr-box--filled" onClick={() => activeForm === null && openEditForm(addr)}>
-                      <button type="button" className="addr-delete-btn" onClick={(e) => handleDeleteAddress(e, addr.id)} title="Delete">
-                        <Trash2 size={13} />
-                      </button>
-                      <span className="addr-box-label">{addr.label}</span>
+                    <div key={addr.id} className="addr-box addr-box--filled" 
+                      onClick={() => activeForm === null && openEditForm(addr)}
+                      onMouseLeave={() => setConfirmDeleteAddrId(null)}>
+                      <div className="addr-delete-btn-wrapper">
+                        {confirmDeleteAddrId === addr.id ? (
+                          <>
+                            <button type="button" className="addr-delete-btn addr-delete-remove-btn" onClick={(e) => handleDeleteAddress(e, addr.id)}>Remove</button>
+                            <button type="button" className="addr-delete-btn addr-delete-cross-btn" onClick={(e) => { e.stopPropagation(); setConfirmDeleteAddrId(null); }}><X size={13} /></button>
+                          </>
+                        ) : (
+                          (!isVendor || addresses.length > 1) && (
+                            <button type="button" className="addr-delete-btn" onClick={(e) => { e.stopPropagation(); setConfirmDeleteAddrId(addr.id); }} title="Delete"><Trash2 size={13} /></button>
+                          )
+                        )}
+                      </div>
+                      {!isVendor && <span className="addr-box-label">{addr.label}</span>}
                       {addr.house_photo_url && (
                         <img src={`${API_ORIGIN}${addr.house_photo_url}`} alt="house" className="addr-box-photo" />
                       )}
@@ -574,19 +699,219 @@ export const UserView = () => {
                 </div>
                 <div className="form-row">
                   <GlassInput
-                    label="Opens at"
-                    type="time"
-                    value={kitchenForm.open_time}
-                    onChange={(e) => setKitchenForm({ ...kitchenForm, open_time: e.target.value })}
+                    label="FSSAI Number"
+                    value={kitchenForm.fssai_number}
+                    onChange={(e) => setKitchenForm({ ...kitchenForm, fssai_number: e.target.value })}
                     disabled={!canEdit}
                   />
-                  <GlassInput
-                    label="Closes at"
-                    type="time"
-                    value={kitchenForm.close_time}
-                    onChange={(e) => setKitchenForm({ ...kitchenForm, close_time: e.target.value })}
+                  <GlassSelect
+                    label="Dietary Type"
+                    options={[
+                      { id: 'Veg', name: 'Veg' },
+                      { id: 'Non-Veg', name: 'Non-Veg' },
+                      { id: 'Both', name: 'Both (Veg & Non-Veg)' },
+                    ]}
+                    value={kitchenForm.dietary_type}
+                    onChange={(val: string) => setKitchenForm({ ...kitchenForm, dietary_type: val })}
                     disabled={!canEdit}
                   />
+                </div>
+
+                <div style={{ margin: '15px 0' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', marginBottom: '8px', display: 'block', fontWeight: 500 }}>
+                    Service Types
+                  </label>
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                    {['Breakfast', 'Lunch', 'Dinner'].map(meal => (
+                      <label key={meal} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '0.9rem', cursor: canEdit ? 'pointer' : 'default', position: 'relative' }}>
+                        <input
+                          type="checkbox"
+                          checked={kitchenForm.service_types.includes(meal)}
+                          onChange={(e) => {
+                            if (!canEdit) return;
+                            const newTypes = e.target.checked
+                              ? [...kitchenForm.service_types, meal]
+                              : kitchenForm.service_types.filter(t => t !== meal);
+                            setKitchenForm({ ...kitchenForm, service_types: newTypes });
+                          }}
+                          disabled={!canEdit}
+                          style={{
+                            appearance: 'none',
+                            width: '18px',
+                            height: '18px',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            background: kitchenForm.service_types.includes(meal) ? 'rgba(74, 222, 128, 0.2)' : 'rgba(255,255,255,0.05)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: canEdit ? 'pointer' : 'default'
+                          }}
+                        />
+                        {kitchenForm.service_types.includes(meal) && (
+                          <div style={{
+                            position: 'absolute',
+                            left: '6px',
+                            top: '4px',
+                            width: '4px',
+                            height: '8px',
+                            border: 'solid #4ade80',
+                            borderWidth: '0 2px 2px 0',
+                            transform: 'rotate(45deg)',
+                            pointerEvents: 'none'
+                          }} />
+                        )}
+                        {meal}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <GlassInput 
+                    label="Order Cutoff (Hours)" 
+                    type="number" 
+                    min="1"
+                    value={String(kitchenForm.order_cutoff_hours)} 
+                    onChange={(e) => {
+                      if (!canEdit) return;
+                      const val = parseInt(e.target.value);
+                      setKitchenForm({ ...kitchenForm, order_cutoff_hours: isNaN(val) ? 1 : Math.max(1, val) });
+                    }} 
+                    disabled={!canEdit}
+                  />
+                  <GlassInput 
+                    label="Capacity per Slot" 
+                    type="number" 
+                    min="1"
+                    value={String(kitchenForm.max_capacity_per_slot)} 
+                    onChange={(e) => {
+                      if (!canEdit) return;
+                      const val = parseInt(e.target.value);
+                      setKitchenForm({ ...kitchenForm, max_capacity_per_slot: isNaN(val) ? 1 : Math.max(1, val) });
+                    }} 
+                    disabled={!canEdit}
+                  />
+                </div>
+
+                <div className="kitchen-slots-section" style={{ marginTop: '20px', marginBottom: '20px' }}>
+                  <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: '#fff' }}>Service Types</h3>
+                  {kitchenForm.service_types.length === 0 && (
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>No service types selected yet.</p>
+                  )}
+                  {kitchenForm.service_types.length > 0 && (
+                    <>
+                      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', overflowX: 'auto', paddingBottom: '5px' }}>
+                        {kitchenForm.service_types.map((service: string) => (
+                          <button
+                            key={service}
+                            type="button"
+                            onClick={() => setActiveServiceTab(service)}
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: '8px',
+                              border: activeServiceTab === service || (activeServiceTab === null && kitchenForm.service_types[0] === service) ? '1px solid #4ade80' : '1px solid rgba(255,255,255,0.2)',
+                              background: activeServiceTab === service || (activeServiceTab === null && kitchenForm.service_types[0] === service) ? 'rgba(74, 222, 128, 0.1)' : 'transparent',
+                              color: activeServiceTab === service || (activeServiceTab === null && kitchenForm.service_types[0] === service) ? '#4ade80' : '#fff',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {service}
+                          </button>
+                        ))}
+                      </div>
+
+                      {(() => {
+                        const currentService = activeServiceTab && kitchenForm.service_types.includes(activeServiceTab) ? activeServiceTab : kitchenForm.service_types[0];
+                        if (!currentService) return null;
+
+                        const currentSlots = Array.isArray(kitchenForm.delivery_windows[currentService]) ? kitchenForm.delivery_windows[currentService] : [];
+                        if (currentSlots.length === 0) {
+                          setTimeout(() => handleAddTimeSlot(currentService), 0);
+                        }
+
+                        return (
+                          <div className="premium-slot-card" style={{ animation: 'fadeInDown 0.3s ease-out' }}>
+                            <div className="premium-slot-header">
+                              <div>
+                                <div className="premium-slot-title">Delivery Windows</div>
+                                <div className="premium-slot-subtitle">Define the operating hours for {currentService}.</div>
+                              </div>
+                              {canEdit && (
+                                <button type="button" className="premium-add-btn" onClick={() => handleAddTimeSlot(currentService)}>
+                                  <Plus size={14} /> Add Window
+                                </button>
+                              )}
+                            </div>
+                            <div className="premium-slot-divider"></div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              {currentSlots.map((slot: any, idx: number) => {
+                                let rawStart = slot.start_time || slot;
+                                let rawEnd = slot.end_time || '';
+                                if (typeof slot === 'string' && slot.includes(' - ')) {
+                                  [rawStart, rawEnd] = slot.split(' - ');
+                                }
+                                
+                                const formatTimeTo24Hr = (timeStr: string) => {
+                                  if (!timeStr) return '';
+                                  if (/^\d{2}:\d{2}$/.test(timeStr.trim())) return timeStr.trim();
+                                  const match = timeStr.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+                                  if (match) {
+                                    let [_, h, m, ampm] = match;
+                                    let hours = parseInt(h, 10);
+                                    if (ampm.toUpperCase() === 'PM' && hours < 12) hours += 12;
+                                    if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+                                    return `${hours.toString().padStart(2, '0')}:${m}`;
+                                  }
+                                  return timeStr.trim();
+                                };
+
+                                let start = formatTimeTo24Hr(rawStart);
+                                let end = rawEnd ? formatTimeTo24Hr(rawEnd) : '';
+
+                                return (
+                                  <div key={idx} className="premium-slot-row">
+                                    <div className="premium-slot-label">
+                                      Window {idx + 1}
+                                    </div>
+                                    <div className="premium-slot-controls">
+                                      <input
+                                        className="premium-time-input"
+                                        type="time"
+                                        value={start}
+                                        onChange={(e) => handleTimeSlotChange(currentService, idx, 'start_time', e.target.value)}
+                                        disabled={!canEdit}
+                                      />
+                                      <span className="premium-time-separator">to</span>
+                                      <input
+                                        className="premium-time-input"
+                                        type="time"
+                                        value={end}
+                                        onChange={(e) => handleTimeSlotChange(currentService, idx, 'end_time', e.target.value)}
+                                        disabled={!canEdit}
+                                      />
+                                      {currentSlots.length > 1 && canEdit && (
+                                        <button
+                                          type="button"
+                                          className="premium-delete-icon"
+                                          onClick={() => handleRemoveTimeSlot(currentService, idx)}
+                                          title="Delete Window"
+                                        >
+                                          <Trash2 size={16} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </>
+                  )}
                 </div>
                 {canEdit ? (
                   <div className="form-actions">

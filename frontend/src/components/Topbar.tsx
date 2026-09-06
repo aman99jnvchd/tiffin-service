@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/useAuthStore';
+import { ChevronLeft, User, LogOut, LogIn, Truck, RefreshCw, Wallet, History } from 'lucide-react';
 import { GlassSelect } from './GlassSelect';
 import { getCities } from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/Topbar.css';
 
 export const Topbar = ({ title }: { title: string }) => {
@@ -51,14 +52,43 @@ export const Topbar = ({ title }: { title: string }) => {
         return role.slice(0, 2).toUpperCase();
     };
 
+    const handleLogout = () => {
+        logout();
+        setShowProfileMenu(false);
+        navigate('/');
+    };
+
+    const location = useLocation();
+    const showBack = location.pathname !== '/';
+
   return (
     <motion.header 
       initial={{ y: -20, opacity: 0, scale: 0.9 }}
       animate={{ y: 0, opacity: 1, scale: 1 }}
       className="topbar"
     >
-      {/* Topbar Left: Page Title */}
-      <div className="topbar-left">
+      {/* Topbar Left: Page Title & Back Button */}
+      <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {showBack && (
+          <button 
+            onClick={() => navigate('/')} 
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.1)', 
+              border: 'none', 
+              color: 'white', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              transition: 'background 0.2s'
+            }}
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
         <h1 className="page-title">{title}</h1>
       </div>
 
@@ -94,15 +124,27 @@ export const Topbar = ({ title }: { title: string }) => {
                 {token ? (
                   <>
                     <div className="glass-option" onClick={() => navigate('/profile')}>
-                      Profile
+                      <User size={16} /> Profile
                     </div>
-                    <div className="glass-option logout" onClick={logout}>
-                      Logout
+                    <div className="glass-option" onClick={() => navigate('/my-deliveries')}>
+                      <Truck size={16} /> Deliveries
+                    </div>
+                    <div className="glass-option" onClick={() => navigate('/subscriptions')}>
+                      <RefreshCw size={16} /> Subscriptions
+                    </div>
+                    <div className="glass-option" onClick={() => navigate('/wallet')}>
+                      <Wallet size={16} /> Tiffini Wallet
+                    </div>
+                    <div className="glass-option" onClick={() => navigate('/history')}>
+                      <History size={16} /> Delivery History
+                    </div>
+                    <div className="glass-option logout" onClick={handleLogout}>
+                      <LogOut size={16} /> Logout
                     </div>
                   </>
                 ) : (
                   <div className="glass-option" onClick={() => navigate('/login')}>
-                    Login
+                    <LogIn size={16} /> Login
                   </div>
                 )}
               </motion.div>

@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { GlassInput } from '../components/GlassInput';
 import { useAuthStore } from '../store/useAuthStore';
 import { loginUser, getMyPermissions } from '../api/axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useToastStore } from '../store/useToastStore';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
   const setPermissions = useAuthStore((state) => state.setPermissions);
   const showToast = useToastStore((state) => state.showToast);
@@ -95,8 +96,9 @@ export const LoginPage = () => {
       
       const token = res.data.data.access_token;
       const roleSlug = res.data.data.user_role;
+      const isOnboardingComplete = res.data.data.is_onboarding_complete;
 
-      setAuth(token, roleSlug);
+      setAuth(token, roleSlug, isOnboardingComplete, res.data.data.dietary_preference, res.data.data.include_eggs);
 
       // Fetch user permissions from backend
       try {
@@ -109,7 +111,9 @@ export const LoginPage = () => {
       }
       
       showToast("Login successful", "success");
-      navigate('/', { replace: true });
+      const locationState = location.state as { from?: string } | null;
+      const from = locationState?.from || '/';
+      navigate(from, { replace: true });
     } catch (err: any) {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);

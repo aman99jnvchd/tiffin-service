@@ -5,7 +5,7 @@ from datetime import date
 from typing import List
 
 from ..models.models import Order, OrderItem, Meal, VendorProfile, Address
-from ..schemas.schemas import OrderCreate, OrderSchema
+from ..schemas.schemas import OrderCreate, OrderSchema, OrderFeedbackUpdate
 from ..schemas.responses import ApiResponse
 from .deps import RoleChecker
 from ..db.session import get_db
@@ -32,19 +32,29 @@ async def place_order(
             detail="Delivery address not found or unauthorized"
         )
 
+    # Determine order type
+    order_type = "ONE_TIME"
+    if order_data.is_continuous or (order_data.subscription_start_date and order_data.subscription_end_date and order_data.subscription_start_date != order_data.subscription_end_date):
+        order_type = "SUBSCRIPTION"
+        if order_data.is_continuous:
+            order_data.subscription_end_date = None
+
     # 2. Create Order Header
     new_order = Order(
         customer_id=current_user['user_id'],
         vendor_id=order_data.vendor_id,
         address_id=order_data.address_id,
-        order_type="ONE_TIME", 
+        order_type=order_type, 
         status="placed",
         delivery_date=order_data.delivery_date,
-        delivery_time=order_data.delivery_time
+        delivery_time=order_data.delivery_time,
+        subscription_start_date=order_data.subscription_start_date,
+        subscription_end_date=order_data.subscription_end_date
     )
     db.add(new_order)
     db.flush() 
 
+    import json
     # 3. Add Order Items
     for item in order_data.items:
         meal = db.query(Meal).filter(Meal.id == item.meal_id, Meal.vendor_id == order_data.vendor_id).first()
@@ -55,7 +65,13 @@ async def place_order(
                 detail=f"Meal {item.meal_id} not available from this vendor"
             )
         
-        db.add(OrderItem(order_id=new_order.id, meal_id=item.meal_id, quantity=item.quantity))
+        delivery_dates_json = json.dumps([d.model_dump() for d in item.delivery_dates]) if item.delivery_dates else None
+        db.add(OrderItem(
+            order_id=new_order.id, 
+            meal_id=item.meal_id, 
+            quantity=item.quantity,
+            delivery_dates=delivery_dates_json
+        ))
 
     db.commit()
     return ApiResponse(status=201, message="Order placed successfully!", data={"order_id": new_order.id})
@@ -88,7 +104,7 @@ async def update_order_status(
     if not vendor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vendor profile not found")
     
-    valid_statuses = ["placed", "accepted", "delivering", "completed", "cancelled"]
+    valid_statuses = ["placed", "accepted", "delivering", "completed", "cancelled", "skipped"]
     if new_status not in valid_statuses:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -122,7 +138,49 @@ async def get_customer_order_history(
 ):
     orders = db.query(Order).options(joinedload(Order.items).joinedload(OrderItem.meal)).filter(
         Order.customer_id == current_user['user_id'],
-        Order.status.in_(["completed", "cancelled"])
+        Order.status.in_(["completed", "cancelled", "skipped", "missed"])
     ).order_by(desc(Order.delivery_date)).all()
     
     return ApiResponse(status=200, message="History fetched", data=orders)
+
+@router.patch("/customer/orders/{order_id}/cancel", response_model=ApiResponse)
+async def cancel_customer_order(
+    order_id: int, 
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(RoleChecker(["customer"]))
+):
+    order = db.query(Order).filter(Order.id == order_id, Order.customer_id == current_user['user_id']).first()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    
+    if order.status not in ["placed"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Order cannot be cancelled at this stage. Preparation has already started."
+        )
+
+    order.status = "skipped"
+    db.commit()
+    return ApiResponse(status=200, message="Order skipped successfully", data={"order_id": order_id})
+
+@router.patch("/customer/orders/{order_id}/feedback", response_model=ApiResponse)
+async def submit_order_feedback(
+    order_id: int, 
+    feedback_data: OrderFeedbackUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(RoleChecker(["customer"]))
+):
+    order = db.query(Order).filter(
+        Order.id == order_id, 
+        Order.customer_id == current_user['user_id']
+    ).first()
+    
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        
+    order.rating = feedback_data.rating
+    order.feedback_tags = feedback_data.feedback_tags
+    order.feedback_comment = feedback_data.feedback_comment
+    
+    db.commit()
+    return ApiResponse(status=200, message="Feedback submitted successfully", data={"order_id": order.id})

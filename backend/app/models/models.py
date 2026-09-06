@@ -57,6 +57,9 @@ class Profile(Base):
     city_id = Column(Integer, ForeignKey("cities.id"))
     hashed_password = Column(String(255), nullable=False)
     is_blocked = Column(Boolean, default=False)
+    cod_status = Column(String(50), default="Eligible")
+    dietary_preference = Column(String(50), nullable=True, default="Any") # e.g. "Pure Veg Only", "Non-Veg Only", "Any"
+    include_eggs = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
@@ -65,6 +68,34 @@ class Profile(Base):
     vendor_profile = relationship("VendorProfile", back_populates="owner", uselist=False, cascade="all, delete")
     addresses = relationship("Address", back_populates="user", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="customer")
+    wallet = relationship("Wallet", back_populates="user", uselist=False, cascade="all, delete-orphan")
+
+# --- Wallet Table ---
+class Wallet(Base):
+    __tablename__ = "wallets"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("profiles.id"), unique=True)
+    balance = Column(Numeric(precision=10, scale=2), default=0.00)
+    is_cod_revoked = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    user = relationship("Profile", back_populates="wallet")
+    transactions = relationship("WalletTransaction", back_populates="wallet", cascade="all, delete-orphan")
+
+# --- Wallet Transactions Table ---
+class WalletTransaction(Base):
+    __tablename__ = "wallet_transactions"
+    id = Column(Integer, primary_key=True, index=True)
+    wallet_id = Column(Integer, ForeignKey("wallets.id"))
+    amount = Column(Numeric(precision=10, scale=2), nullable=False)
+    transaction_type = Column(String(50), nullable=False) # e.g., 'credit', 'debit'
+    description = Column(String(255), nullable=True) # e.g., 'Recharge', 'Meal Order'
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    wallet = relationship("Wallet", back_populates="transactions")
 
 # --- Vendor Profiles Table ---
 class VendorProfile(Base):
@@ -75,11 +106,33 @@ class VendorProfile(Base):
     is_open = Column(Boolean, default=True)
     open_time = Column(Time)
     close_time = Column(Time)
+    
+    # Onboarding & Settings Fields
+    dietary_type = Column(String(50), nullable=True) # Pure Veg, Non-Veg, Both
+    service_types = Column(String(255), nullable=True) # e.g. "Breakfast,Lunch,Dinner"
+    delivery_windows = Column(Text, nullable=True) # JSON of delivery slots
+    order_cutoff_hours = Column(Integer, nullable=True)
+    max_capacity_per_slot = Column(Integer, nullable=True)
+    fssai_number = Column(String(100), nullable=True)
+    is_onboarding_complete = Column(Boolean, default=False)
+    onboarding_step = Column(Integer, default=1)
 
     # Relationships
     owner = relationship("Profile", back_populates="vendor_profile")
     meals = relationship("Meal", back_populates="vendor", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="vendor")
+    categories = relationship("Category", back_populates="vendor", cascade="all, delete-orphan")
+
+# --- Categories Table ---
+class Category(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendor_profiles.id"))
+    name = Column(String(50), nullable=False)
+
+    # Relationships
+    vendor = relationship("VendorProfile", back_populates="categories")
+    meals = relationship("Meal", back_populates="category")
 
 # --- Meals Table ---
 class Meal(Base):
@@ -90,24 +143,26 @@ class Meal(Base):
     base_price = Column(Numeric(precision=10, scale=2), nullable=False)
     description = Column(Text, nullable=True)
     image_url = Column(String(255), nullable=True)
-    schedule_days = Column(String(50), nullable=True)  # e.g. "Mon,Wed,Fri" or null = daily
+    available_days = Column(Text, nullable=True)  # JSON array e.g. ["Mon", "Wed", "Fri"] or null = daily
     is_always_available = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    service_types = Column(String(255), nullable=True) # e.g. "Breakfast,Lunch"
+    dietary_type = Column(String(20), nullable=False, default='veg') # 'veg', 'non-veg', 'egg'
 
     # Relationships
     vendor = relationship("VendorProfile", back_populates="meals")
-    daily_entries = relationship("DailyMenu", back_populates="meal", cascade="all, delete-orphan")
+    category = relationship("Category", back_populates="meals")
 
-# --- Daily Menu Table ---
-class DailyMenu(Base):
-    __tablename__ = "daily_menu"
-    id = Column(Integer, primary_key=True, index=True)
-    meal_id = Column(Integer, ForeignKey("meals.id"))
-    vendor_id = Column(Integer, ForeignKey("vendor_profiles.id"))
-    date = Column(Date, server_default=func.current_date())
+    @property
+    def kitchen_name(self):
+        return self.vendor.kitchen_name if self.vendor else None
 
-    # Relationships
-    meal = relationship("Meal", back_populates="daily_entries")
+    @property
+    def order_cutoff_hours(self):
+        return getattr(self.vendor, 'order_cutoff_hours', None) if self.vendor else None
+
+
 
 # --- Addresses Table ---
 class Address(Base):
@@ -136,6 +191,11 @@ class Order(Base):
     status = Column(String(50), default="placed")
     delivery_date = Column(Date, nullable=False)
     delivery_time = Column(Time, nullable=True)
+    subscription_start_date = Column(Date, nullable=True)
+    subscription_end_date = Column(Date, nullable=True)
+    rating = Column(Integer, nullable=True)
+    feedback_tags = Column(String(255), nullable=True)
+    feedback_comment = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
@@ -151,7 +211,24 @@ class OrderItem(Base):
     order_id = Column(Integer, ForeignKey("orders.id"))
     meal_id = Column(Integer, ForeignKey("meals.id"))
     quantity = Column(Integer, nullable=False)
+    delivery_dates = Column(Text, nullable=True)  # JSON string of explicit dates like ["2026-07-15", "2026-07-16"]
     
     # Relationships
     order = relationship("Order", back_populates="items")
     meal = relationship("Meal")
+
+# --- Subscriptions Table ---
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("profiles.id"))
+    vendor_id = Column(Integer, ForeignKey("vendor_profiles.id"))
+    meal_id = Column(Integer, ForeignKey("meals.id"))
+    status = Column(String(50), default="active") # active, paused, cancelled
+    selected_days = Column(String(255), nullable=False, default="[]") # JSON string e.g., "[1, 3, 5]" (1=Mon, 7=Sun)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # relationships
+    customer = relationship("Profile", foreign_keys=[customer_id])
+    vendor = relationship("VendorProfile", foreign_keys=[vendor_id])
+    meal = relationship("Meal", foreign_keys=[meal_id])

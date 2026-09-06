@@ -1,0 +1,450 @@
+/* Delivery History Layout */
+.dh-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.dh-list {
+  padding: 0 25px 25px 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dh-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dh-header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dh-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Filter Chips */
+.dh-filters {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 25px 25px 25px;
+}
+
+.dh-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.dh-filter-chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+}
+
+.dh-filter-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dh-filter-chip.active {
+  background: rgba(124, 77, 255, 0.2);
+  border-color: #7c4dff;
+  color: white;
+}
+
+/* Month Grouping */
+.dh-month-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.dh-month-header {
+  padding: 8px 0;
+  color: white;
+  font-weight: 700;
+  font-size: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  letter-spacing: 0.5px;
+}
+
+.dh-month-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
+  gap: 16px;
+}
+
+/* Past Delivery Card */
+.pdc-card {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  gap: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+}
+
+.pdc-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-color: rgba(124, 77, 255, 0.3);
+}
+
+.pdc-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.pdc-info-wrapper {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.pdc-thumbnail {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.pdc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pdc-title {
+  margin: 0;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdc-vendor {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdc-date {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pdc-status {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pdc-status.delivered {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.pdc-status.skipped {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pdc-status.missed {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.pdc-status.cancelled {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+/* Actions area */
+.pdc-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.pdc-rate-btn {
+  background: transparent;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: #FBBF24;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdc-rate-btn:hover {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.pdc-rating-display {
+  display: flex;
+  gap: 2px;
+  color: #FBBF24;
+}
+
+.pdc-price {
+  font-weight: 600;
+  color: white;
+  font-size: 1rem;
+}
+
+/* Empty State */
+.dh-empty {
+  padding: 48px 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dh-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.dh-empty h3 {
+  margin: 0 0 8px;
+  color: white;
+  font-weight: 500;
+}
+
+/* Feedback Modal */
+.fm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.fm-modal {
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.fm-header {
+  padding: 24px 24px 16px;
+  text-align: center;
+}
+
+.fm-header h3 {
+  margin: 0 0 8px;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.fm-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+}
+
+.fm-body {
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fm-stars {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.fm-star {
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.2);
+  transition: color 0.2s ease;
+}
+
+.fm-star.active,
+.fm-star.hovered {
+  color: #FBBF24;
+}
+
+.fm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.fm-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fm-tag.selected {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: #FBBF24;
+  color: #FBBF24;
+}
+
+.fm-comment {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  font-size: 0.95rem;
+  resize: none;
+  height: 100px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.fm-comment:focus {
+  border-color: #7c4dff;
+}
+
+.fm-footer {
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fm-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+}
+
+.fm-btn-primary {
+  background: #7c4dff;
+  color: white;
+}
+
+.fm-btn-primary:hover {
+  background: #651fff;
+}
+
+.fm-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fm-btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.fm-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 768px) {
+  .dh-filters {
+    padding: 0 16px 16px 16px;
+  }
+
+  .dh-list {
+    padding: 0 16px 16px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fm-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .fm-modal {
+    border-radius: 24px 24px 0 0;
+    max-width: 100%;
+  }
+
+  .pdc-main {
+    flex-direction: column;
+  }
+
+  .pdc-status {
+    align-self: flex-start;
+  }
+}

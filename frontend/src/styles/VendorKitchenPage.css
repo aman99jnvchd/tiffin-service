@@ -1,0 +1,139 @@
+/* Vendor Kitchen Page Styles */
+
+.vkp-container {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: padding-bottom 0.3s ease;
+  padding: 0;
+  /* Padding moved to child elements */
+}
+
+.vkp-container.has-cart {
+  padding-bottom: 90px !important;
+}
+
+/* Header (Sticky) */
+.vkp-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: var(--bg-dark);
+  padding: 15px 15px 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* Circle Back Button */
+.vkp-back-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.vkp-back-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Search Bar (reusing cd-search-bar logic but specific wrapper) */
+.vkp-search-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Hero Section */
+.vkp-hero {
+  margin-bottom: 25px;
+  padding: 0 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  container-type: inline-size;
+}
+
+.vkp-hero-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vkp-kitchen-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.vkp-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+/* Menu Section */
+.vkp-menu-section {
+  display: flex;
+  flex-direction: column;
+  padding: 0 15px;
+  gap: 16px;
+}
+
+.vkp-section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Use a flexible grid for meals */
+.vkp-meals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.vkp-meals-grid .cd-meal-card {
+  width: 100%;
+}
+
+/* Empty State */
+.vkp-empty {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.95rem;
+  padding: 30px 0;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.vkp-dietary-filters {
+  display: flex;
+  padding: 0 15px;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}

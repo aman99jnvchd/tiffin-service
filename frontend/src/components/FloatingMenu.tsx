@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Building2, Users, UserCog, LogOut } from "lucide-react";
+import { LayoutDashboard, Building2, Users, UserCog, LogOut, UtensilsCrossed } from "lucide-react";
 import { useAuthStore } from '../store/useAuthStore';
 import '../styles/FloatingMenu.css';
 
@@ -28,6 +28,7 @@ export const FloatingMenu = () => {
   const canViewCities = hasPermission('city:view');
   const canViewRoles = hasPermission('role:view');
   const canViewUsers = hasPermission('user:view');
+  const canViewMeals = hasPermission('meal:view');
 
   // Close menu on outside click
   useEffect(() => {
@@ -54,7 +55,7 @@ export const FloatingMenu = () => {
   const handleLogout = () => {
     logout();
     setIsOpen(false);
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -84,7 +85,7 @@ export const FloatingMenu = () => {
             transition={{ duration: 0.2 }}
           >
             <div className="floating-menu-header">
-              <span className="floating-menu-logo">CTS Admin</span>
+              <span className="floating-menu-logo">Tiffni Admin</span>
             </div>
 
             <nav className="floating-menu-nav">
@@ -127,6 +128,17 @@ export const FloatingMenu = () => {
                 >
                   <UserCog size={20} />
                   <span>User Management</span>
+                </NavLink>
+              )}
+
+              {canViewMeals && (
+                <NavLink
+                  to="/admin/menu"
+                  className={({ isActive }) => `floating-nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <UtensilsCrossed size={20} />
+                  <span>Menu</span>
                 </NavLink>
               )}
 

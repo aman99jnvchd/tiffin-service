@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, ImagePlus, ChevronDown, UtensilsCrossed, ArrowLeft } from 'lucide-react';
+import { Plus, Edit, ImagePlus, ChevronDown, UtensilsCrossed, ArrowLeft, Trash2, Check, X } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getMeals, createMeal, updateMeal, uploadMealImage, getUserById } from '../api/axios';
+import { getMeals, createMeal, updateMeal, uploadMealImage, getUserById, getCategories, createCategory, updateCategory, deleteCategory } from '../api/axios';
 import { GlassInput } from '../components/GlassInput';
 import { CardView } from '../components/CardView';
 import { useToastStore } from '../store/useToastStore';
@@ -21,6 +21,9 @@ const EMPTY_FORM = {
   schedule_days: null as string | null, // null = daily
   is_always_available: true,
   is_active: true,
+  category_id: null as number | null,
+  service_types: [] as string[],
+  dietary_type: 'veg' as 'veg' | 'egg' | 'non-veg',
 };
 
 // Format schedule_days string into display badges
@@ -74,6 +77,11 @@ export const MenuPage = () => {
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
 
   const canCreate = hasPermission('meal:create');
   const canUpdate = hasPermission('meal:update');
@@ -87,11 +95,21 @@ export const MenuPage = () => {
         const u = res.data.data;
         setVendorName(u.vendor_profile?.kitchen_name || u.name);
         setVendorProfileId(u.vendor_profile?.id || null);
-        await fetchMeals(u.vendor_profile?.id);
+        await Promise.all([
+          fetchMeals(u.vendor_profile?.id),
+          fetchCategories(u.vendor_profile?.id)
+        ]);
       } else {
-        await fetchMeals();
+        await Promise.all([fetchMeals(), fetchCategories()]);
       }
-    } catch { showToast("Failed to load vendor", "error"); }
+    } catch { showToast("Failed to load data", "error"); }
+  };
+
+  const fetchCategories = async (vpId?: number) => {
+    try {
+      const res = await getCategories(vpId);
+      setCategories(res.data.data);
+    } catch { showToast("Failed to load categories", "error"); }
   };
 
   const fetchMeals = async (vpId?: number) => {
@@ -108,25 +126,32 @@ export const MenuPage = () => {
     setImagePreview(null);
     setImageFile(null);
     setShowDayPicker(false);
+    setShowCategoryDropdown(false);
+    setCategorySearch('');
     setIsModalOpen(true);
   };
 
   const openEditModal = (meal: any) => {
     setEditingId(meal.id);
-    const days = meal.schedule_days ? meal.schedule_days.split(',').map((d: string) => d.trim()) : [];
+    const days = meal.available_days ? meal.available_days.split(',').map((d: string) => d.trim()) : [];
     setSelectedDays(days);
     setFormData({
       name: meal.name,
       base_price: String(meal.base_price),
       description: meal.description || '',
       image_url: meal.image_url || '',
-      schedule_days: meal.schedule_days || null,
+      schedule_days: meal.available_days || null,
       is_always_available: meal.is_always_available,
       is_active: meal.is_active,
+      category_id: meal.category_id || null,
+      service_types: meal.service_types ? meal.service_types.split(',').map((s: string) => s.trim()) : [],
+      dietary_type: (meal.dietary_type as 'veg' | 'egg' | 'non-veg') || 'veg',
     });
     setImagePreview(meal.image_url ? `http://localhost:1415${meal.image_url}` : null);
     setImageFile(null);
     setShowDayPicker(false);
+    setShowCategoryDropdown(false);
+    setCategorySearch('');
     setIsModalOpen(true);
   };
 
@@ -154,13 +179,69 @@ export const MenuPage = () => {
     }
   };
 
+  const handleCreateCategory = async () => {
+    if (!categorySearch.trim()) return;
+    try {
+      if (!vendorProfileId) return showToast("Vendor profile not found", "error");
+      const res = await createCategory(vendorProfileId, { name: categorySearch.trim() });
+      const newCategory = res.data.data;
+      setCategories(prev => [...prev, newCategory]);
+      setFormData(prev => ({ ...prev, category_id: newCategory.id }));
+      closeCategoryDropdown();
+      showToast("Category created", "success");
+    } catch (err: any) {
+      if (err.response?.status === 409) {
+        showToast(err.response.data.detail, "error");
+      } else {
+        showToast("Failed to create category", "error");
+      }
+    }
+  };
+
+  const closeCategoryDropdown = () => {
+    setShowCategoryDropdown(false);
+    setCategorySearch('');
+    setEditingCategoryId(null);
+  };
+
+  const filteredCategories = categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase()));
+
+  const handleUpdateCategory = async (id: number) => {
+    if (!editingCategoryName.trim()) return;
+    try {
+      await updateCategory(id, { name: editingCategoryName.trim() });
+      setCategories(prev => prev.map(c => c.id === id ? { ...c, name: editingCategoryName.trim() } : c));
+      setEditingCategoryId(null);
+      showToast("Category updated", "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || "Failed to update category", "error");
+    }
+  };
+
+  const handleDeleteCategory = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteCategory(id);
+      setCategories(prev => prev.filter(c => c.id !== id));
+      if (formData.category_id === id) {
+        setFormData(prev => ({ ...prev, category_id: null }));
+      }
+      showToast("Category deleted", "success");
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || "Failed to delete category", "error");
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.category_id) return showToast("Category is required", "error");
     if (!formData.name.trim()) return showToast("Meal Name is required", "error");
     if (!formData.base_price || isNaN(Number(formData.base_price)) || Number(formData.base_price) <= 0)
       return showToast("Valid Price is required", "error");
     if (!formData.is_always_available && selectedDays.length === 0)
       return showToast("Select at least one day for scheduled meals", "error");
+    if (formData.service_types.length === 0)
+      return showToast("Select at least one Service Type", "error");
 
     setLoading(true);
     try {
@@ -175,9 +256,12 @@ export const MenuPage = () => {
         base_price: Number(formData.base_price),
         description: formData.description || null,
         image_url: imageUrl || null,
-        schedule_days: formData.is_always_available ? null : selectedDays.join(','),
         is_always_available: formData.is_always_available,
+        available_days: formData.is_always_available ? null : (selectedDays.length ? selectedDays.join(',') : null),
         is_active: formData.is_active,
+        category_id: formData.category_id,
+        service_types: formData.service_types.length ? formData.service_types.join(',') : null,
+        dietary_type: formData.dietary_type,
       };
 
       if (editingId) {
@@ -242,7 +326,7 @@ export const MenuPage = () => {
                   </td>
                   <td>₹{Number(meal.base_price).toFixed(2)}</td>
                   <td className="meal-desc-cell">{meal.description || <span className="text-muted">—</span>}</td>
-                  <td>{formatSchedule(meal.is_always_available, meal.schedule_days)}</td>
+                  <td>{formatSchedule(meal.is_always_available, meal.available_days)}</td>
                   <td>
                     <span className={`status-pill ${meal.is_active ? 'active' : 'inactive'}`}>
                       {meal.is_active ? 'Active' : 'Inactive'}
@@ -287,7 +371,7 @@ export const MenuPage = () => {
           { key: 'base_price', label: 'Price', render: (val) => `₹${Number(val).toFixed(2)}` },
           {
             key: 'is_always_available', label: 'Schedule',
-            render: (val, item) => formatSchedule(val, item.schedule_days)
+            render: (val, item) => formatSchedule(val, item.available_days)
           },
           {
             key: 'is_active', label: 'Status',
@@ -307,7 +391,7 @@ export const MenuPage = () => {
           <>
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="modal-backdrop" onClick={() => setIsModalOpen(false)}
+              className="global-backdrop" onClick={() => setIsModalOpen(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -327,6 +411,106 @@ export const MenuPage = () => {
                   }
                 </div>
 
+                <div className="input-container">
+                  <div 
+                    className="glass-input category-dropdown-trigger" 
+                    onClick={() => setShowCategoryDropdown(true)}
+                    style={{ borderColor: showCategoryDropdown ? 'var(--primary-glow)' : undefined }}
+                  >
+                    <span>
+                      {formData.category_id
+                        ? categories.find(c => c.id === formData.category_id)?.name
+                        : ''}
+                    </span>
+                    <ChevronDown size={18} style={{ transform: showCategoryDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', opacity: 0.6 }} />
+                  </div>
+                  <label className={`floating-label ${formData.category_id || showCategoryDropdown ? 'active' : ''}`}>Category</label>
+
+                  {showCategoryDropdown && (
+                    <>
+                      <div className="day-picker-overlay" onClick={closeCategoryDropdown} />
+                      <div className="category-dropdown-menu">
+                        <div className="category-search-row">
+                          <input
+                            type="text"
+                            placeholder="Search or add new category"
+                            value={categorySearch}
+                            onChange={e => {
+                              const val = e.target.value;
+                              setCategorySearch(val.charAt(0).toUpperCase() + val.slice(1));
+                            }}
+                            autoFocus
+                          />
+                          <button type="button" onClick={handleCreateCategory}>Add</button>
+                        </div>
+                        <div className="category-list">
+                          {filteredCategories.length === 0 ? (
+                            <div className="category-not-found"><i>not found</i></div>
+                          ) : (
+                            filteredCategories.map(cat => (
+                              <div
+                                key={cat.id}
+                                className={`category-item ${formData.category_id === cat.id ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (editingCategoryId === cat.id) return;
+                                  setFormData(prev => ({ ...prev, category_id: cat.id }));
+                                  closeCategoryDropdown();
+                                }}
+                              >
+                                {editingCategoryId === cat.id ? (
+                                  <div className="category-edit-row" onClick={e => e.stopPropagation()}>
+                                    <input 
+                                      type="text" 
+                                      value={editingCategoryName} 
+                                      onChange={e => {
+                                        const val = e.target.value;
+                                        setEditingCategoryName(val.charAt(0).toUpperCase() + val.slice(1));
+                                      }} 
+                                      autoFocus 
+                                      onKeyDown={e => {
+                                        if (e.key === 'Enter') handleUpdateCategory(cat.id);
+                                        if (e.key === 'Escape') setEditingCategoryId(null);
+                                      }}
+                                    />
+                                    <div className="category-actions">
+                                      <button type="button" className="cat-action-btn check" onClick={() => handleUpdateCategory(cat.id)}><Check size={14} /></button>
+                                      <button type="button" className="cat-action-btn cancel" onClick={() => setEditingCategoryId(null)}><X size={14} /></button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <span className="cat-name">{cat.name}</span>
+                                    <div className="category-actions">
+                                      <button 
+                                        type="button" 
+                                        className="cat-action-btn edit" 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditingCategoryId(cat.id);
+                                          setEditingCategoryName(cat.name);
+                                        }}
+                                      >
+                                        <Edit size={14} />
+                                      </button>
+                                      <button 
+                                        type="button" 
+                                        className="cat-action-btn delete" 
+                                        onClick={(e) => handleDeleteCategory(cat.id, e)}
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
                 <GlassInput label="Meal Name" value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
 
@@ -335,6 +519,59 @@ export const MenuPage = () => {
 
                 <GlassInput label="Description (optional)" value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+
+                {/* Service Types */}
+                <div className="meal-section-label" style={{ marginTop: '16px' }}>Service Types</div>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                  {['Breakfast', 'Lunch', 'Dinner'].map(st => {
+                    const isSelected = formData.service_types.includes(st);
+                    return (
+                      <button
+                        key={st}
+                        type="button"
+                        className={`toggle-option ${isSelected ? 'green-active' : 'grey'}`}
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            service_types: isSelected 
+                              ? prev.service_types.filter(s => s !== st)
+                              : [...prev.service_types, st]
+                          }));
+                        }}
+                      >
+                        {st}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Dietary Type Segmented Control */}
+                <div className="meal-section-label" style={{ marginTop: '4px' }}>Dietary Type</div>
+                <div className="dietary-segment-control">
+                  {[
+                    { value: 'veg', label: '🟢 Veg', activeColor: 'rgba(34, 197, 94, 0.2)', activeBorder: 'rgba(34, 197, 94, 0.5)', activeText: '#4ade80' },
+                    { value: 'egg', label: '🟡 Egg', activeColor: 'rgba(234, 179, 8, 0.2)', activeBorder: 'rgba(234, 179, 8, 0.5)', activeText: '#fbbf24' },
+                    { value: 'non-veg', label: '🔴 Non-Veg', activeColor: 'rgba(239, 68, 68, 0.2)', activeBorder: 'rgba(239, 68, 68, 0.5)', activeText: '#f87171' },
+                  ].map(opt => {
+                    const isActive = formData.dietary_type === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className="dietary-segment-btn"
+                        style={isActive ? {
+                          background: opt.activeColor,
+                          borderColor: opt.activeBorder,
+                          color: opt.activeText,
+                          fontWeight: 600,
+                        } : {}}
+                        onClick={() => setFormData(prev => ({ ...prev, dietary_type: opt.value as 'veg' | 'egg' | 'non-veg' }))}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
 
                 {/* Schedule toggle */}
                 <div className="meal-section-label">Schedule</div>

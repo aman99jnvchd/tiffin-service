@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import List
@@ -19,9 +19,15 @@ def get_all_permissions(db: Session = Depends(get_db)):
 
 # --- ROLES CRUD ---
 @router.get("/roles", response_model=ApiResponse[List[RoleSchema]])
-def get_roles(db: Session = Depends(get_db)):
-    """List all roles with their assigned permissions"""
-    roles = db.query(Role).all()
+def get_roles(
+    db: Session = Depends(get_db),
+    active_only: bool = Query(False, description="If true, return only active roles"),
+):
+    """List roles with assigned permissions (optionally only active ones)."""
+    query = db.query(Role)
+    if active_only:
+        query = query.filter(Role.is_active == True)
+    roles = query.all()
     return ApiResponse(status=200, message="Roles fetched", data=roles)
 
 @router.post("/roles", response_model=ApiResponse[RoleSchema])

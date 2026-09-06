@@ -403,7 +403,7 @@ export const RoleManager = () => {
           <>
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="modal-backdrop"
+              className="global-backdrop"
               onClick={() => setIsModalOpen(false)}
             />
             <motion.div 
@@ -472,7 +472,7 @@ export const RoleManager = () => {
           <>
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="modal-backdrop"
+              className="global-backdrop"
               onClick={() => setIsPermissionsModalOpen(false)}
             />
             <motion.div 

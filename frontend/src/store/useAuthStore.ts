@@ -5,7 +5,10 @@ interface AuthState {
   token: string | null;
   role: string | null;
   permissions: string[];
-  setAuth: (token: string, role: string) => void;
+  isOnboardingComplete: boolean;
+  dietaryPreference: string | null;
+  includeEggs: boolean;
+  setAuth: (token: string, role: string, isOnboardingComplete?: boolean, dietaryPreference?: string, includeEggs?: boolean) => void;
   setPermissions: (permissions: string[]) => void;
   logout: () => void;
 }
@@ -16,12 +19,16 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       role: null,
       permissions: [],
+      isOnboardingComplete: true,
+      dietaryPreference: null,
+      includeEggs: false,
       
-      setAuth: (token, role) => set({ token, role }),
+      setAuth: (token, role, isOnboardingComplete = true, dietaryPreference = null, includeEggs = false) => 
+        set({ token, role, isOnboardingComplete, dietaryPreference, includeEggs }),
       setPermissions: (permissions) => set({ permissions }),
       
       logout: () => {
-        set({ token: null, role: null, permissions: [] });
+        set({ token: null, role: null, permissions: [], isOnboardingComplete: true, dietaryPreference: null, includeEggs: false });
       },
     }), { 
       name: 'auth-storage',

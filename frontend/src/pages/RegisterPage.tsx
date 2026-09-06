@@ -118,7 +118,7 @@ export const RegisterPage = () => {
 
       if (authData && authData.access_token) {
         showToast('Successfully Registered', 'success');
-        setAuth(authData.access_token, authData.user_role);
+        setAuth(authData.access_token, authData.user_role, authData.is_onboarding_complete, authData.dietary_preference, authData.include_eggs);
 
         // Fetch user permissions from backend
         try {

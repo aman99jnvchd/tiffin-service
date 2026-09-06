@@ -14,8 +14,8 @@
 .page-content {
   padding: 100px 25px 25px;
   flex: 1;
-  width: 100%; 
-  box-sizing: border-box; 
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Mobile adjustments */
@@ -43,4 +43,8 @@
   max-width: 100% !important;
   margin: 0 !important;
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.customer-page-content {
+  padding: 0 !important;
 }

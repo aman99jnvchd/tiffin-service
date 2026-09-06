@@ -103,7 +103,13 @@ async def get_user_by_id(
             "kitchen_name": vendor.kitchen_name,
             "is_open": vendor.is_open,
             "open_time": vendor.open_time.strftime("%H:%M") if vendor.open_time else None,
-            "close_time": vendor.close_time.strftime("%H:%M") if vendor.close_time else None
+            "close_time": vendor.close_time.strftime("%H:%M") if vendor.close_time else None,
+            "fssai_number": vendor.fssai_number,
+            "delivery_windows": vendor.delivery_windows,
+            "service_types": vendor.service_types,
+            "dietary_type": vendor.dietary_type,
+            "order_cutoff_hours": vendor.order_cutoff_hours,
+            "max_capacity_per_slot": vendor.max_capacity_per_slot
         }
 
     # Add addresses

@@ -82,7 +82,10 @@ async def register_user(user_data: ProfileCreate, db: Session = Depends(get_db))
             "token_type": "bearer", 
             "user_role": role_obj.slug, # Return string ("customer") to frontend
             "city_id": new_profile.city_id,
-            "user_name": new_profile.name
+            "user_name": new_profile.name,
+            "dietary_preference": new_profile.dietary_preference,
+            "include_eggs": new_profile.include_eggs,
+            "is_onboarding_complete": False if role_obj.slug == "vendor" else True
         }
     )
 
@@ -128,7 +131,10 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
             "access_token": access_token,
             "token_type": "bearer",
             "user_role": role_slug,
-            "city_id": user.city_id
+            "city_id": user.city_id,
+            "dietary_preference": user.dietary_preference,
+            "include_eggs": user.include_eggs,
+            "is_onboarding_complete": getattr(user.vendor_profile, 'is_onboarding_complete', True) if role_slug == "vendor" else True
         }
     )
 
@@ -177,6 +183,10 @@ async def get_my_profile(
         "phone": user.phone,
         "city": {"id": user.city.id, "name": user.city.name} if user.city else None,
         "role": {"id": user.role.id, "name": user.role.name, "slug": user.role.slug} if user.role else None,
+        "cod_status": user.cod_status,
+        "dietary_preference": getattr(user, 'dietary_preference', 'Any'),
+        "include_eggs": getattr(user, 'include_eggs', False),
+        "wallet": {"balance": float(user.wallet.balance)} if getattr(user, 'wallet', None) else {"balance": 0.0},
         "created_at": user.created_at.isoformat() if user.created_at else None,
         "vendor_profile": None,
         "addresses": [
@@ -194,9 +204,16 @@ async def get_my_profile(
         data["vendor_profile"] = {
             "id": v.id,
             "kitchen_name": v.kitchen_name,
-            "is_open": v.is_open,
             "open_time": v.open_time.strftime("%H:%M") if v.open_time else None,
             "close_time": v.close_time.strftime("%H:%M") if v.close_time else None,
+            "dietary_type": v.dietary_type,
+            "service_types": v.service_types,
+            "delivery_windows": v.delivery_windows,
+            "order_cutoff_hours": v.order_cutoff_hours,
+            "max_capacity_per_slot": v.max_capacity_per_slot,
+            "fssai_number": v.fssai_number,
+            "is_onboarding_complete": v.is_onboarding_complete,
+            "onboarding_step": v.onboarding_step,
         }
 
     return ApiResponse(status=200, message="Profile fetched", data=data)
@@ -225,6 +242,10 @@ async def update_my_profile(
     user.name = body.name
     user.phone = body.phone
     user.city_id = body.city_id
+    if body.dietary_preference is not None:
+        user.dietary_preference = body.dietary_preference
+    if body.include_eggs is not None:
+        user.include_eggs = body.include_eggs
     db.commit()
     db.refresh(user)
 

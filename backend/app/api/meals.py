@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from typing import List
+from typing import List, Optional
 from datetime import date
 
 from ..db.session import get_db
-from ..models.models import DailyMenu, Meal, VendorProfile
+from ..models.models import Meal, VendorProfile
 from ..schemas.responses import ApiResponse
 from ..schemas.schemas import MealSchema, MealCreate, MealUpdate
 from .deps import RoleChecker, get_current_user_data, PermissionChecker
@@ -21,8 +21,14 @@ async def get_all_meals(
     current_user: dict = Depends(PermissionChecker("meal:view"))
 ):
     query = db.query(Meal)
-    if vendor_id is not None:
+    
+    if current_user["role"] == "vendor":
+        vendor = db.query(VendorProfile).filter(VendorProfile.user_id == current_user["user_id"]).first()
+        if vendor:
+            query = query.filter(Meal.vendor_id == vendor.id)
+    elif vendor_id is not None:
         query = query.filter(Meal.vendor_id == vendor_id)
+        
     meals = query.all()
     return ApiResponse(status=200, message="Meals fetched", data=meals)
 
@@ -45,9 +51,12 @@ async def create_meal(
         base_price=meal_in.base_price,
         description=meal_in.description,
         image_url=meal_in.image_url,
-        schedule_days=meal_in.schedule_days,
+        available_days=meal_in.available_days,
         is_always_available=meal_in.is_always_available,
         is_active=meal_in.is_active,
+        category_id=meal_in.category_id,
+        service_types=meal_in.service_types,
+        dietary_type=meal_in.dietary_type,
     )
     db.add(new_meal)
     db.commit()
@@ -101,15 +110,22 @@ async def toggle_meal_availability(
 @router.get("/menu", response_model=ApiResponse)
 async def get_menu(
     vendor_id: int = None,
+    dietary_preference: Optional[str] = None,
+    include_eggs: Optional[bool] = False,
     db: Session = Depends(get_db)
 ):
-    today = date.today()
-    query = db.query(Meal).outerjoin(DailyMenu).filter(
-        Meal.is_active == True,
-        or_(Meal.is_always_available == True, DailyMenu.date == today)
-    )
+    query = db.query(Meal)
     if vendor_id is not None:
         query = query.filter(Meal.vendor_id == vendor_id)
+        
+    if dietary_preference in ["Pure Veg Only", "Veg Meals Only"]:
+        if include_eggs:
+            query = query.filter(Meal.dietary_type.in_(["veg", "egg"]))
+        else:
+            query = query.filter(Meal.dietary_type == "veg")
+    elif dietary_preference == "Non-Veg Only":
+        query = query.filter(Meal.dietary_type == "non-veg")
+        
     meals = query.all()
     data = [MealSchema.from_orm_with_kitchen(m) for m in meals]
     return ApiResponse(status=200, message="Menu fetched successfully", data=data)
@@ -118,11 +134,8 @@ async def get_menu(
 # --- Public: Get active menu for a vendor (kept for backwards compat) ---
 @router.get("/vendor/{vendor_id}/menu", response_model=ApiResponse[List[MealSchema]])
 async def get_active_menu(vendor_id: int, db: Session = Depends(get_db)):
-    today = date.today()
-    meals = db.query(Meal).outerjoin(DailyMenu).filter(
-        Meal.vendor_id == vendor_id,
-        Meal.is_active == True,
-        or_(Meal.is_always_available == True, DailyMenu.date == today)
+    meals = db.query(Meal).filter(
+        Meal.vendor_id == vendor_id
     ).all()
     return ApiResponse(status=200, message="Menu fetched successfully", data=meals)
 
@@ -136,18 +149,37 @@ async def get_all_vendor_meals(vendor_id: int, db: Session = Depends(get_db)):
 
 # --- Public: Search meals and vendors ---
 @router.get("/search", response_model=ApiResponse)
-async def search(q: str, db: Session = Depends(get_db)):
+async def search(
+    q: str,
+    dietary_preference: Optional[str] = None,
+    include_eggs: Optional[bool] = False,
+    db: Session = Depends(get_db)
+):
     """Search meals by name and vendors by kitchen name. Min 2 chars enforced by caller."""
     term = f"%{q.lower()}%"
 
-    meals = db.query(Meal).filter(
-        Meal.is_active == True,
+    meal_query = db.query(Meal).filter(
         Meal.name.ilike(term)
-    ).limit(20).all()
+    )
+    if dietary_preference in ["Pure Veg Only", "Veg Meals Only"]:
+        if include_eggs:
+            meal_query = meal_query.filter(Meal.dietary_type.in_(["veg", "egg"]))
+        else:
+            meal_query = meal_query.filter(Meal.dietary_type == "veg")
+    elif dietary_preference == "Non-Veg Only":
+        meal_query = meal_query.filter(Meal.dietary_type == "non-veg")
+        
+    meals = meal_query.limit(20).all()
 
-    vendors = db.query(VendorProfile).filter(
+    vendor_query = db.query(VendorProfile).filter(
         VendorProfile.kitchen_name.ilike(term)
-    ).limit(10).all()
+    )
+    if dietary_preference == "Pure Veg Only":
+        vendor_query = vendor_query.filter(VendorProfile.dietary_type == "Pure Veg")
+    elif dietary_preference == "Non-Veg Only":
+        vendor_query = vendor_query.filter(VendorProfile.dietary_type.in_(["Both", "Non-Veg"]))
+        
+    vendors = vendor_query.limit(10).all()
 
     return ApiResponse(status=200, message="Search results", data={
         "meals": [MealSchema.from_orm_with_kitchen(m) for m in meals],

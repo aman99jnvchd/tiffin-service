@@ -45,25 +45,31 @@
   min-width: 125px;
   transition: width 0.3s ease;
 }
+
 .topbar .glass-input-wrapper {
   margin-bottom: 0;
 }
+
 .topbar-city-select .glass-label {
   display: none;
 }
+
 .topbar-city-select .glass-select-header {
   padding: 12px 15px;
   border: none;
   border-radius: 999px;
   background: #ffffff0d;
 }
+
 .topbar-city-select .selected-text {
   padding-right: 7px;
 }
+
 .topbar-city-select .glass-select-header .select-arrow {
   font-size: 12px;
   margin-top: 2px;
 }
+
 .topbar-city-select .glass-select-header.active .select-arrow {
   margin-bottom: 2px;
 }
@@ -72,6 +78,7 @@
 .profile-section {
   cursor: pointer;
 }
+
 .initials-avatar {
   width: 45px;
   height: 45px;
@@ -85,21 +92,29 @@
   color: #fff;
   border: 1px solid #ffffff33;
 }
+
 /* Profile avatar dropdown */
 .island-dropdown {
   right: 5px;
   top: 52px;
-  width: 180px;
+  width: 195px;
   backdrop-filter: blur(50px);
   background: #0a0a0afe;
 }
+
+.profile-section .glass-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .profile-section .glass-option.logout {
   color: var(--error-red);
 }
 
 /* Large Desktop - 75% width */
 @media (min-width: 1441px) {
-  .topbar { 
+  .topbar {
     width: 75%;
     max-width: 1400px;
   }
@@ -107,14 +122,14 @@
 
 /* Desktop - 80% width */
 @media (min-width: 1025px) and (max-width: 1440px) {
-  .topbar { 
+  .topbar {
     width: 80%;
   }
 }
 
 /* Tablet - 90% width */
 @media (min-width: 768px) and (max-width: 1024px) {
-  .topbar { 
+  .topbar {
     width: 90%;
     padding: 0 17px;
   }
@@ -127,7 +142,7 @@
 
 /* Mobile - 100% width with padding */
 @media (max-width: 767px) {
-  .topbar { 
+  .topbar {
     width: calc(100% - 22px);
     height: 54px;
     padding: 0 13px 0 18px;
@@ -136,9 +151,11 @@
   .page-title {
     font-size: 0.95rem;
   }
+
   .topbar-city-select {
     width: 110px;
   }
+
   .topbar-city-select .glass-select-header {
     font-size: 0.85rem;
   }
@@ -151,6 +168,8 @@
   }
 
   @media (max-width: 380px) {
-    .topbar-city-select { display: none; }
+    .topbar-city-select {
+      display: none;
+    }
   }
 }

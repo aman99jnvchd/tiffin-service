@@ -1,0 +1,418 @@
+.onboarding-wizard-container {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wizard-card {
+  width: 100%;
+  max-width: 600px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 auto;
+}
+
+.wizard-progress {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.wizard-progress::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.progress-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.progress-step.active {
+  background: #6366f1;
+  border-color: #7c4dff;
+  color: white;
+  box-shadow: 0 0 15px rgba(124, 77, 255, 0.4);
+}
+
+.onboarding-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.onboarding-step h3 {
+  font-size: 1.5rem;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.onboarding-step p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.radio-group-container,
+.checkbox-group-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-group-container>label,
+.checkbox-group-container>label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.radio-group,
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.radio-label,
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio-label input,
+.checkbox-label input {
+  display: none;
+}
+
+.radio-label.selected,
+.checkbox-label.selected {
+  background: rgba(124, 77, 255, 0.15);
+  border-color: #7c4dff;
+  color: #a78bfa;
+  border-radius: 999px;
+}
+
+.service-time-slot {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.service-time-slot h4 {
+  font-size: 0.95rem;
+  color: white;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.time-slot-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.time-slot-input-row .glass-input {
+  flex: 1;
+  padding: 10px 12px;
+  color-scheme: dark;
+}
+
+.time-slot-input-row .small-btn {
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  box-shadow: none;
+}
+
+.add-time-btn {
+  background: rgba(124, 77, 255, 0.1) !important;
+  border-color: rgba(124, 77, 255, 0.3) !important;
+  color: #a78bfa !important;
+  justify-content: center;
+  width: max-content;
+}
+
+.time-slot-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.time-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124, 77, 255, 0.15);
+  border: 1px solid rgba(124, 77, 255, 0.3);
+  color: #c4b5fd;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.time-badge button {
+  background: none;
+  border: none;
+  color: #ffb74d;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: 4px;
+}
+
+.logistics-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+.logistics-label {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.logistics-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 9px 6px 8px;
+  gap: 8px;
+}
+
+.logistics-number-input {
+  width: 30px;
+  background: transparent;
+  border: none;
+  color: white;
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 700;
+  outline: none;
+  padding: 0;
+}
+
+/* Hide standard arrows on number input for sleek look */
+.logistics-number-input::-webkit-outer-spin-button,
+.logistics-number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.logistics-number-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.logistics-suffix {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.button-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.button-row button {
+  flex: 1;
+}
+
+.glass-button.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none !important;
+}
+
+.glass-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.locked-input .glass-input {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.warning-text {
+  color: #ffb74d !important;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .wizard-card {
+    padding: 20px;
+  }
+
+  .radio-group,
+  .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+
+  .button-row {
+    flex-direction: column-reverse;
+  }
+
+  .add-time-text {
+    display: none;
+  }
+}
+
+/* --- Step 3 Address Form --- */
+.address-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.address-image-upload {
+  margin-bottom: 10px;
+}
+
+.image-upload-box.dashed {
+  width: 160px;
+  height: 100px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.3s ease;
+}
+
+.image-upload-box.dashed:hover {
+  border-color: #a78bfa;
+  color: #a78bfa;
+  background: rgba(124, 77, 255, 0.05);
+}
+
+.address-row.split {
+  display: flex;
+  gap: 16px;
+}
+
+.address-row.split .address-field {
+  flex: 1;
+}
+
+.address-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.address-field label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.locked-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.dropdown-arrow {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.actions-right {
+  justify-content: flex-end;
+  margin-top: 20px;
+  gap: 16px;
+}
+
+.actions-right .action-btn {
+  flex: 0 0 auto;
+  padding: 10px 24px;
+  border-radius: 12px;
+}
+
+.actions-right .secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.actions-right .primary {
+  background: #7c4dff;
+  border: none;
+  box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+}
+
+.onboarding-step .input-container {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 480px) {
+  .onboarding-step .image-upload-box.dashed {
+    width: 100%;
+  }
+
+  .address-row.split {
+    flex-direction: column;
+  }
+
+  .actions-right {
+    flex-direction: column-reverse;
+    flex-wrap: nowrap;
+  }
+}

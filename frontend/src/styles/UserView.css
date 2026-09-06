@@ -31,9 +31,10 @@
 /* User View Layout */
 .user-view-layout {
   display: grid;
-  grid-template-columns: 25% 75%;
-  gap: 20px;
   align-items: start;
+  grid-template-columns: 1fr 3fr;
+  gap: 25px;
+  padding: 0 25px 25px 25px;
 }
 
 /* Cards Section */
@@ -42,12 +43,12 @@
   flex-direction: column;
   gap: 20px;
   position: sticky;
-  top: 100px;
+  top: 24px;
 }
 
 /* Profile Card */
 .profile-card {
-  background: rgba(17, 24, 39, 0.6);
+  background: rgba(12, 12, 12, 0.6);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
@@ -227,12 +228,26 @@
   margin-top: 1rem;
 }
 
-/* Tablet Responsive */
-@media (max-width: 1024px) {
-  .user-view-layout {
-    grid-template-columns: 30% 70%;
+/* Skeleton Loader */
+.skeleton-card {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
   }
 
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Tablet Responsive */
+@media (max-width: 1024px) {
   .card-header h3 {
     font-size: 1rem;
   }
@@ -242,11 +257,59 @@
   }
 }
 
+/* Between tablet and mobile: stack right-side fields like <768px */
+@media (max-width: 940px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* "Set password" inline row (2 fields + button) */
+  .form-row--password-inline {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row--password-inline__btn {
+    min-height: 52px;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions .glass-button {
+    width: 100%;
+  }
+
+  .addr-box {
+    width: calc(50% - 6px);
+  }
+
+  .addr-box--expanded {
+    width: 100%;
+  }
+
+  .addr-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .addr-form-actions {
+    flex-direction: column;
+  }
+
+  .addr-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .user-view-layout {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
+    padding: 0 16px 16px 16px;
   }
 
   .user-cards-section {
@@ -273,7 +336,7 @@
 
   .form-row {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: 20px;
   }
 
   .form-actions {
@@ -292,21 +355,67 @@
   }
 
   .card-header {
-    padding: 16px;
+    padding: 14px;
   }
 
   .card-body {
-    padding: 16px;
-    gap: 14px;
+    padding: 14px;
+    gap: 12px;
   }
 
   .card-icon {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 
   .card-header h3 {
     font-size: 0.95rem;
+  }
+
+  /* Form Optimization */
+  .form-title {
+    font-size: 1.2rem !important;
+  }
+
+  .form-title svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .glass-card .form-row {
+    gap: 12px !important;
+  }
+
+  .user-view-container .glass-card .form-row {
+    gap: 0px !important;
+  }
+
+  .form-actions {
+    margin-top: 1rem;
+  }
+
+  .form-actions .glass-button {
+    min-height: 44px;
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+
+  /* Target GlassInputs in UserView */
+  .glass-card {
+    padding: 20px;
+  }
+
+  .glass-input,
+  .glass-select-header {
+    padding: 0.9rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .floating-label,
+  .glass-label {
+    top: 0.9rem;
+    left: 1rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -453,8 +562,17 @@
   text-decoration: none;
 }
 
-.addr-icon-btn.map:hover { background: rgba(99, 102, 241, 0.2); border-color: rgba(99,102,241,0.4); color: #818cf8; }
-.addr-icon-btn.del:hover { background: rgba(239, 68, 68, 0.15); border-color: rgba(239,68,68,0.35); color: #f87171; }
+.addr-icon-btn.map:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #818cf8;
+}
+
+.addr-icon-btn.del:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
 
 .addr-box-photo {
   width: 100%;
@@ -511,14 +629,20 @@
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
-  min-height: 3.8rem; /* ~2 rows */
+  min-height: 3.8rem;
+  /* ~2 rows */
   outline: none;
   transition: border-color 0.3s ease;
   box-sizing: border-box;
 }
 
-.addr-textarea::placeholder { color: transparent; }
-.addr-textarea:focus { border-color: var(--primary-glow, rgba(124, 77, 255, 0.6)); }
+.addr-textarea::placeholder {
+  color: transparent;
+}
+
+.addr-textarea:focus {
+  border-color: var(--primary-glow, rgba(124, 77, 255, 0.6));
+}
 
 .addr-textarea-label {
   position: absolute;
@@ -531,8 +655,8 @@
   z-index: 5;
 }
 
-.addr-textarea:focus ~ .addr-textarea-label,
-.addr-textarea:not(:placeholder-shown) ~ .addr-textarea-label {
+.addr-textarea:focus~.addr-textarea-label,
+.addr-textarea:not(:placeholder-shown)~.addr-textarea-label {
   top: -0.7rem;
   left: 1rem;
   font-size: 0.8rem;
@@ -662,8 +786,9 @@
   }
 
   .addr-form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
   }
 
   .addr-form-actions {
@@ -676,8 +801,9 @@
   }
 
   .form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
   }
 }
 
@@ -763,6 +889,17 @@
   margin-bottom: 0;
 }
 
+/* Collapse password card fields into one-per-row (matches <=768px behavior) */
+@media (max-width: 940px) {
+  .form-row--password-inline {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row--password-inline__btn {
+    min-height: 52px;
+  }
+}
+
 @media (max-width: 768px) {
   .form-row--password-inline {
     grid-template-columns: 1fr;
@@ -778,7 +915,8 @@
   display: flex;
   gap: 8px;
   align-items: flex-end;
-  padding-bottom: 2rem; /* matches input-container margin-bottom */
+  padding-bottom: 2rem;
+  /* matches input-container margin-bottom */
 }
 
 .kitchen-status-wrap .toggle-option {

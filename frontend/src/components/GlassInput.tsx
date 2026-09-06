@@ -8,6 +8,7 @@ interface Props {
   errorMessage?: string;
   maxLength?: number;
   disabled?: boolean;
+  min?: string | number;
 }
 
 export const GlassInput = ({ 
@@ -18,6 +19,7 @@ export const GlassInput = ({
   errorMessage, 
   maxLength, 
   disabled,
+  min,
 }: Props) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +27,9 @@ export const GlassInput = ({
   // True, if focused OR has value
   const isFloating = (isFocused || value.length > 0);
 
-  const currentLabel = errorMessage || label;
+  // If there's an error and the label is acting as a placeholder (not floating), show the error message.
+  // Otherwise (when floating up), revert to the original short label to prevent text cut-off.
+  const displayLabel = (!isFloating && errorMessage) ? errorMessage : label;
   const isError = !!errorMessage;
 
   return (
@@ -35,6 +39,7 @@ export const GlassInput = ({
         value={value}
         onChange={onChange}
         maxLength={maxLength}
+        min={min}
         disabled={disabled}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
@@ -45,7 +50,7 @@ export const GlassInput = ({
 
       {/* Label floats if focused OR has value */}
       <label className={`floating-label ${isFloating ? 'active' : ''} ${isError ? 'label-error' : ''}`}>
-        {currentLabel}
+        {displayLabel}
       </label>
 
       {/* Password visibility toggle button */}
