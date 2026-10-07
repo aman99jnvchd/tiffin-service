@@ -49,10 +49,7 @@ export const FloatingCartWidget = () => {
             {isConfirmingClear ? (
               <span className="cd-fc-view-text">Remove</span>
             ) : (
-              <>
-                <span className="cd-fc-view-text">View Cart</span>
-                <span className="cd-fc-items-text">{totalItems} item(s)</span>
-              </>
+              <span className="cd-fc-view-text">View Cart</span>
             )}
           </button>
           <button

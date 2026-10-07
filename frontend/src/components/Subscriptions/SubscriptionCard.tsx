@@ -41,6 +41,15 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({ subscription
 
   if (!meal) return null;
 
+  const getBadgeStyle = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'breakfast': return { bg: 'rgba(251, 146, 60, 0.15)', color: '#fb923c' }; // Orange
+      case 'lunch': return { bg: 'rgba(250, 204, 21, 0.15)', color: '#facc15' }; // Yellow
+      case 'dinner': return { bg: 'rgba(96, 165, 250, 0.15)', color: '#60a5fa' }; // Blue
+      default: return { bg: 'rgba(255,255,255,0.08)', color: 'white' };
+    }
+  };
+
   const startDate = subscription.subscription_start_date ? new Date(subscription.subscription_start_date) : null;
   const endDate = subscription.subscription_end_date ? new Date(subscription.subscription_end_date) : null;
   const startDateStr = startDate ? startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown';
@@ -87,7 +96,24 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({ subscription
             )}
             
             <div className="sc-info">
-              <h4 className="sc-name">{meal.name}</h4>
+              <h4 className="sc-name">
+                {meal.name}
+                {subscription.service_type && (
+                  <span style={{
+                    fontSize: '0.7rem', 
+                    fontWeight: 600, 
+                    background: getBadgeStyle(subscription.service_type).bg,
+                    color: getBadgeStyle(subscription.service_type).color,
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    marginLeft: '8px',
+                    verticalAlign: 'middle',
+                    textTransform: 'uppercase'
+                  }}>
+                    {subscription.service_type}
+                  </span>
+                )}
+              </h4>
               <p className="sc-vendor">By {meal.kitchen_name || 'Vendor Kitchen'}</p>
               <span className="sc-price">₹{Number(meal.base_price).toFixed(0)} / meal</span>
             </div>

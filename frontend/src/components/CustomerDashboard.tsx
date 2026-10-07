@@ -291,12 +291,12 @@ export const CustomerDashboard = () => {
                     {cartItems.find(i => i.meal_id === m.id) ? (
                       <div className="cd-quantity-controls" onClick={e => e.stopPropagation()}>
                         <span style={{ fontSize: '0.85rem' }}>
-                          {(() => {
-                            const cartItem = cartItems.find(i => i.meal_id === m.id);
-                            if (cartItem?.is_continuous) return 'Daily';
-                            const days = cartItem?.dates?.length || 0;
-                            return `${days} Day(s)`;
-                          })()}
+                              {(() => {
+                                const mealCartItems = cartItems.filter(i => i.meal_id === m.id);
+                                if (mealCartItems.some(i => i.is_continuous)) return 'Daily';
+                                const totalMeals = mealCartItems.reduce((acc, item) => acc + (item.dates?.length || 0), 0);
+                                return `${totalMeals} Meal(s)`;
+                              })()}
                         </span>
                         <button 
                           className="cd-add-btn edit" 
@@ -349,22 +349,23 @@ export const CustomerDashboard = () => {
           isOpen={activeMealId === selectedMeal.id}
           onClose={() => setActiveMealId(null)}
           meal={selectedMeal}
-          initialDates={cartItems.find(i => i.meal_id === selectedMeal.id)?.dates || []}
-          initialIsContinuous={cartItems.find(i => i.meal_id === selectedMeal.id)?.is_continuous || false}
           vendorDeliveryWindows={vendors.find(v => v.id === selectedMeal.vendor_id)?.delivery_windows || null}
-          onSave={(dates, isContinuous) => {
-            useCartStore.getState().setMealDates(
-              {
-                meal_id: selectedMeal.id,
-                name: selectedMeal.name,
-                price: Number(selectedMeal.base_price),
-                image_url: selectedMeal.image_url,
-                vendor_id: selectedMeal.vendor_id,
-                kitchen_name: selectedMeal.kitchen_name
-              },
-              dates,
-              isContinuous
-            );
+          onSave={(updates) => {
+            updates.forEach(({ serviceType, dates, isContinuous }) => {
+              useCartStore.getState().setMealDates(
+                {
+                  meal_id: selectedMeal.id,
+                  name: selectedMeal.name,
+                  price: Number(selectedMeal.base_price),
+                  image_url: selectedMeal.image_url,
+                  vendor_id: selectedMeal.vendor_id,
+                  kitchen_name: selectedMeal.kitchen_name
+                },
+                dates,
+                serviceType,
+                isContinuous
+              );
+            });
             setActiveMealId(null);
           }}
         />

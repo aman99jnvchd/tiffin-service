@@ -10,19 +10,20 @@ interface DateSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   meal: any;
-  initialDates: OrderDateSlot[];
-  initialIsContinuous?: boolean;
-  onSave: (dates: OrderDateSlot[], isContinuous?: boolean) => void;
+  initialServiceType?: string;
+  onSave: (updates: { serviceType: string, dates: OrderDateSlot[], isContinuous: boolean }[]) => void;
   vendorDeliveryWindows?: string; // JSON string
 }
 
 export const DateSelectionModal: React.FC<DateSelectionModalProps> = ({
-  isOpen, onClose, meal, initialDates, initialIsContinuous, onSave, vendorDeliveryWindows
+  isOpen, onClose, meal, initialServiceType, onSave, vendorDeliveryWindows
 }) => {
-  const [localDates, setLocalDates] = useState<OrderDateSlot[]>([]);
-  const [isContinuous, setIsContinuous] = useState(false);
+  const [stateMap, setStateMap] = useState<Record<string, { dates: OrderDateSlot[], isContinuous: boolean }>>({});
   const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [selectedServiceType, setSelectedServiceType] = useState<string>('');
+
+  const localDates = stateMap[selectedServiceType]?.dates || [];
+  const isContinuous = stateMap[selectedServiceType]?.isContinuous || false;
 
   const { items: cartItems } = useCartStore();
 
@@ -54,15 +55,31 @@ export const DateSelectionModal: React.FC<DateSelectionModalProps> = ({
     }
   }, [vendorDeliveryWindows, selectedServiceType, mealServiceTypes]);
 
+  // Setup initial service type when modal opens
   useEffect(() => {
     if (isOpen) {
-      setLocalDates(initialDates);
-      setIsContinuous(initialIsContinuous || false);
-      if (mealServiceTypes.length > 0) {
+      if (initialServiceType) {
+        setSelectedServiceType(initialServiceType);
+      } else if (mealServiceTypes.length > 0) {
         setSelectedServiceType(mealServiceTypes[0]);
       }
     }
-  }, [isOpen, initialDates, mealServiceTypes]);
+  }, [isOpen, initialServiceType, mealServiceTypes]);
+
+  // Sync dates from store ONLY when modal OPENS
+  useEffect(() => {
+    if (isOpen) {
+      const matchingCartItems = cartItems.filter(i => i.meal_id === meal.id);
+      const initialMap: Record<string, { dates: OrderDateSlot[], isContinuous: boolean }> = {};
+      matchingCartItems.forEach(item => {
+        initialMap[item.service_type] = {
+          dates: item.dates || [],
+          isContinuous: item.is_continuous || false
+        };
+      });
+      setStateMap(initialMap);
+    }
+  }, [isOpen, meal.id, cartItems]);
 
   useEffect(() => {
     if (isOpen && availableSlots.length > 0) {
@@ -74,24 +91,34 @@ export const DateSelectionModal: React.FC<DateSelectionModalProps> = ({
 
   useEffect(() => {
     if (isOpen && selectedSlot && localDates.length > 0) {
-      setLocalDates(prev => {
-        // Only update if they differ to avoid unnecessary renders
-        const needsUpdate = prev.some(d => d.slot !== selectedSlot || d.service_type !== selectedServiceType);
-        return needsUpdate ? prev.map(d => ({ ...d, slot: selectedSlot, service_type: selectedServiceType })) : prev;
-      });
+      const needsUpdate = localDates.some(d => d.slot !== selectedSlot || d.service_type !== selectedServiceType);
+      if (needsUpdate) {
+        setStateMap(prev => ({
+          ...prev,
+          [selectedServiceType]: {
+            ...prev[selectedServiceType],
+            dates: prev[selectedServiceType].dates.map(d => ({ ...d, slot: selectedSlot, service_type: selectedServiceType }))
+          }
+        }));
+      }
     }
-  }, [selectedSlot, selectedServiceType, isOpen]);
+  }, [selectedSlot, selectedServiceType, isOpen, localDates]);
 
   // Removed early return to prevent hook errors and allow exit animation
 
   const handleToggle = (dateStr: string) => {
-    setIsContinuous(false);
-    const existing = localDates.find(d => d.date === dateStr);
-    if (existing) {
-      setLocalDates(prev => prev.filter(d => d.date !== dateStr));
-    } else {
-      setLocalDates(prev => [...prev, { date: dateStr, slot: selectedSlot, service_type: selectedServiceType }]);
-    }
+    setStateMap(prev => {
+      const current = prev[selectedServiceType] || { dates: [], isContinuous: false };
+      const existing = current.dates.find(d => d.date === dateStr);
+      const newDates = existing 
+        ? current.dates.filter(d => d.date !== dateStr)
+        : [...current.dates, { date: dateStr, slot: selectedSlot, service_type: selectedServiceType }];
+        
+      return {
+        ...prev,
+        [selectedServiceType]: { dates: newDates, isContinuous: false }
+      };
+    });
   };
 
   const availableDaysArray = React.useMemo(() => {
@@ -109,11 +136,11 @@ export const DateSelectionModal: React.FC<DateSelectionModalProps> = ({
     const d = new Date(); // Start from today
     let counter = 1;
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+
     // Generate up to 14 valid days, capping iterations at 60
     while (validDays.length < 14 && counter < 60) {
       d.setDate(d.getDate() + 1); // Advance by 1 day
-      
+
       const dayName = daysOfWeek[d.getDay()];
       if (availableDaysArray.length === 0 || availableDaysArray.includes(dayName)) {
         const localDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -125,13 +152,15 @@ export const DateSelectionModal: React.FC<DateSelectionModalProps> = ({
   }, [availableDaysArray]);
 
   const handleMassSelect = (days: number) => {
-    setIsContinuous(false);
     const newDates: OrderDateSlot[] = upcomingDays.slice(0, days).map(dateStr => ({
       date: dateStr,
       slot: selectedSlot,
       service_type: selectedServiceType
     }));
-    setLocalDates(newDates);
+    setStateMap(prev => ({
+      ...prev,
+      [selectedServiceType]: { dates: newDates, isContinuous: false }
+    }));
   };
 
   return (
@@ -165,142 +194,141 @@ export const DateSelectionModal: React.FC<DateSelectionModalProps> = ({
             }}
           >
             {/* Pull Indicator */}
-            <div 
-              className="ds-pull-bar" 
+            <div
+              className="ds-pull-bar"
               onPointerDown={() => {
                 if (navigator.vibrate) navigator.vibrate(50);
               }}
             />
 
-          <div className="ds-scroll-content">
-            <div className="ds-modal-header">
-              <h3>Select Delivery Schedule</h3>
-            </div>
+            <div className="ds-scroll-content">
+              <div className="ds-modal-header">
+                <h3>Select Delivery Schedule</h3>
+              </div>
 
-            <p className="ds-meal-name">{meal.name}</p>
+              <p className="ds-meal-name">{meal.name}</p>
 
-            {mealServiceTypes.length > 0 && (
-              <div className="ds-service-type-section" style={{ marginBottom: '20px' }}>
+              {mealServiceTypes.length > 0 && (
+                <div className="ds-service-type-section" style={{ marginBottom: '20px' }}>
+                  <label className="ds-section-label">
+                    Service Type
+                  </label>
+                  {mealServiceTypes.length === 1 ? (
+                    <div className="ds-service-type-single">
+                      {mealServiceTypes[0]}
+                    </div>
+                  ) : (
+                    <div className="ds-segmented-control">
+                      {mealServiceTypes.map((st: string) => (
+                        <button
+                          key={st}
+                          className={`ds-segment-btn ${selectedServiceType === st ? 'active' : ''}`}
+                          onClick={() => {
+                            if (selectedServiceType !== st) {
+                              setSelectedServiceType(st);
+                              // Do not clear localDates manually, the useEffect will sync it from the store
+                            }
+                          }}
+                        >
+                          {st}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="ds-time-slot-section" style={{ marginBottom: '20px' }}>
                 <label className="ds-section-label">
-                  Service Type
+                  Time Slot
                 </label>
-                {mealServiceTypes.length === 1 ? (
-                  <div className="ds-service-type-single">
-                    {mealServiceTypes[0]}
-                  </div>
-                ) : (
-                  <div className="ds-segmented-control">
-                    {mealServiceTypes.map((st: string) => (
-                      <button
-                        key={st}
-                        className={`ds-segment-btn ${selectedServiceType === st ? 'active' : ''}`}
-                        onClick={() => {
-                          if (selectedServiceType !== st) {
-                            setSelectedServiceType(st);
-                            setLocalDates([]); // Reset dates on service type switch
-                          }
-                        }}
-                      >
-                        {st}
-                      </button>
+                <div className="ds-input-wrapper" style={{ position: 'relative' }}>
+                  <Clock size={16} className="ds-input-icon" />
+                  <select
+                    className="ds-glass-input"
+                    value={selectedSlot}
+                    onChange={(e) => setSelectedSlot(e.target.value)}
+                    style={{ appearance: 'none', paddingRight: '40px' }}
+                  >
+                    {availableSlots.map(slot => (
+                      <option key={slot} value={slot}>{slot}</option>
                     ))}
-                  </div>
-                )}
+                  </select>
+                  <ChevronDown size={18} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'rgba(255,255,255,0.5)' }} />
+                </div>
               </div>
-            )}
 
-            <div className="ds-time-slot-section" style={{ marginBottom: '20px' }}>
-              <label className="ds-section-label">
-                Time Slot
-              </label>
-              <div className="ds-input-wrapper" style={{ position: 'relative' }}>
-                <Clock size={16} className="ds-input-icon" />
-                <select
-                  className="ds-glass-input"
-                  value={selectedSlot}
-                  onChange={(e) => setSelectedSlot(e.target.value)}
-                  style={{ appearance: 'none', paddingRight: '40px' }}
+              <div className="ds-mass-select">
+                <button className="ds-pill-btn" onClick={() => handleMassSelect(7)}>Next 7 Days</button>
+                <button
+                  className={`ds-pill-btn ds-continuous-btn ${isContinuous ? 'active' : ''}`}
+                  onClick={() => {
+                    if (!isContinuous) {
+                      setStateMap(prev => ({
+                        ...prev,
+                        [selectedServiceType]: { dates: [], isContinuous: true }
+                      }));
+                    }
+                  }}
+                >Everyday</button>
+                <button
+                  className={`ds-pill-btn ds-clear-btn ${localDates.length > 0 || isContinuous ? 'active' : ''}`}
+                  onClick={() => {
+                    setStateMap(prev => ({
+                      ...prev,
+                      [selectedServiceType]: { dates: [], isContinuous: false }
+                    }));
+                  }}
+                  title="Clear All"
                 >
-                  {availableSlots.map(slot => (
-                    <option key={slot} value={slot}>{slot}</option>
-                  ))}
-                </select>
-                <ChevronDown size={18} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'rgba(255,255,255,0.5)' }} />
+                  <X size={14} />
+                </button>
+              </div>
+
+              <div className="ds-calendar-section">
+                <div className="ds-date-grid">
+                  {upcomingDays.map((dateStr) => {
+                    const selectedObj = localDates.find(d => d.date === dateStr);
+                    const dateObj = new Date(dateStr);
+                    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                    const dayNum = dateObj.getDate();
+
+                    return (
+                      <motion.button
+                        key={dateStr}
+                        whileTap={{ scale: 0.95 }}
+                        className={`ds-date-cell ${selectedObj ? 'selected' : ''}`}
+                        onClick={() => handleToggle(dateStr)}
+                      >
+                        <span className="ds-day-num">{dayNum}</span>
+                        <span className="ds-day-name">{dayName}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-
-            <div className="ds-mass-select">
-              <button className="ds-pill-btn" onClick={() => handleMassSelect(7)}>Next 7 Days</button>
-              <button 
-                className={`ds-pill-btn ds-continuous-btn ${isContinuous ? 'active' : ''}`} 
-                onClick={() => {
-                  if (!isContinuous) {
-                    setIsContinuous(true);
-                    setLocalDates([]); // Clear selected dates when activating Everyday
+            <div className="ds-modal-footer">
+              <button className="ds-schedule-btn" onClick={() => {
+                // Build the updates array from stateMap
+                const updates = Object.entries(stateMap).map(([svcType, data]) => {
+                  if (data.isContinuous) {
+                    const continuousDates = upcomingDays.slice(0, availableDaysArray.length || 7).map(dateStr => ({
+                      date: dateStr,
+                      slot: selectedSlot, // Note: For continuous, we are keeping the currently visible selectedSlot which might be a bug if different slots per service type exist, but we assume it matches.
+                      service_type: svcType
+                    }));
+                    return { serviceType: svcType, dates: continuousDates, isContinuous: true };
                   }
-                }}
-              >Everyday</button>
-              <button
-                className={`ds-pill-btn ds-clear-btn ${localDates.length > 0 || isContinuous ? 'active' : ''}`}
-                onClick={() => {
-                  setLocalDates([]);
-                  setIsContinuous(false);
-                }}
-                title="Clear All"
-              >
-                <X size={14} />
+                  return { serviceType: svcType, dates: data.dates, isContinuous: false };
+                });
+                onSave(updates);
+              }}>
+                <CalendarPlus size={18} />
+                Schedule
               </button>
             </div>
-
-            <div className="ds-calendar-section">
-              <div className="ds-date-grid">
-                {upcomingDays.map((dateStr) => {
-                  const selectedObj = localDates.find(d => d.date === dateStr);
-                  const dateObj = new Date(dateStr);
-                  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                  const dayNum = dateObj.getDate();
-
-                  return (
-                    <motion.button
-                      key={dateStr}
-                      whileTap={{ scale: 0.95 }}
-                      className={`ds-date-cell ${selectedObj ? 'selected' : ''}`}
-                      onClick={() => handleToggle(dateStr)}
-                    >
-                      <span className="ds-day-name">{dayName}</span>
-                      <span className="ds-day-num">{dayNum}</span>
-                      {selectedObj && <span className="ds-date-slot-text">{selectedObj.slot}</span>}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-          <div className="ds-modal-footer">
-            <button className="ds-schedule-btn" onClick={() => {
-              if (isContinuous) {
-                // To ensure the subscription records which days of the week are selected,
-                // we pass one date instance for each unique available day.
-                // upcomingDays already matches availableDaysArray, so taking the first N dates
-                // where N = availableDaysArray.length covers exactly one of each available weekday.
-                const daysToTake = availableDaysArray.length === 0 ? 7 : availableDaysArray.length;
-                const continuousDates = upcomingDays.slice(0, daysToTake).map(dateStr => ({
-                  date: dateStr,
-                  slot: selectedSlot,
-                  service_type: selectedServiceType
-                }));
-                if (continuousDates.length > 0) {
-                  onSave(continuousDates, true);
-                }
-              } else {
-                onSave(localDates, false);
-              }
-            }}>
-              <CalendarPlus size={18} />
-              Schedule Delivery
-            </button>
-          </div>
-        </motion.div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>

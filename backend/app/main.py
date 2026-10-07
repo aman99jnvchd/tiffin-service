@@ -1,5 +1,7 @@
 import os
 from fastapi import FastAPI, Request, status
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
@@ -85,3 +87,7 @@ async def root():
         "city": "Chandigarh (CHD)",
         "docs": "/docs"
     }
+
+@app.on_event("startup")
+async def startup():
+    FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")

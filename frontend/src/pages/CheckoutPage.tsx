@@ -144,10 +144,10 @@ export const CheckoutPage = () => {
             <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><ShoppingBag size={20} /> Order Summary</h3>
             <div className="cart-items-list">
               {items.map(item => (
-                <div key={item.meal_id} className="co-cart-card">
+                <div key={item.id} className="co-cart-card">
                   <div className="co-cart-card-header">
                     <div className="co-cart-info">
-                      <h4>{item.name}</h4>
+                      <h4>{item.name} <span style={{fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', fontWeight: 400}}>({item.service_type})</span></h4>
                     </div>
                     <div className="co-cart-actions">
                       {!item.is_continuous ? (
@@ -163,7 +163,7 @@ export const CheckoutPage = () => {
                           <strong>₹{item.price}</strong> <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>/ meal</span>
                         </span>
                       )}
-                      <button className="co-cart-remove" onClick={() => removeItem(item.meal_id)}>
+                      <button className="co-cart-remove" onClick={() => removeItem(item.id)}>
                         <Trash2 size={18} />
                       </button>
                     </div>

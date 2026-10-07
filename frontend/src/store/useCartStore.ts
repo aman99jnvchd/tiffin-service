@@ -13,7 +13,9 @@ export interface OrderDateSlot {
 }
 
 export interface CartItem {
+  id: string; // Composite: meal_id + "_" + service_type
   meal_id: number;
+  service_type: string;
   name: string;
   price: number;
   dates: OrderDateSlot[]; // Array of date and slot objects
@@ -27,8 +29,8 @@ interface CartState {
   items: CartItem[];
   vendorId: number | null;
   vendorName: string | null;
-  setMealDates: (item: Omit<CartItem, 'dates'>, dates: OrderDateSlot[], isContinuous?: boolean) => void;
-  removeItem: (mealId: number) => void;
+  setMealDates: (item: Omit<CartItem, 'dates' | 'id' | 'service_type'>, dates: OrderDateSlot[], serviceType: string, isContinuous?: boolean) => void;
+  removeItem: (cartItemId: string) => void;
   clearCart: () => void;
   getTotal: () => number;
 }
@@ -40,11 +42,12 @@ export const useCartStore = create<CartState>()(
       vendorId: null,
       vendorName: null,
 
-      setMealDates: (item, dates, isContinuous = false) => {
+      setMealDates: (item, dates, serviceType, isContinuous = false) => {
         const state = get();
+        const cartItemId = `${item.meal_id}_${serviceType || 'none'}`;
         
         if (dates.length === 0) {
-           get().removeItem(item.meal_id);
+           get().removeItem(cartItemId);
            return;
         }
 
@@ -53,7 +56,7 @@ export const useCartStore = create<CartState>()(
           set({ 
             vendorId: item.vendor_id, 
             vendorName: item.kitchen_name,
-            items: [{ ...item, dates, is_continuous: isContinuous }] 
+            items: [{ ...item, id: cartItemId, service_type: serviceType, dates, is_continuous: isContinuous }] 
           });
           return;
         }
@@ -63,29 +66,29 @@ export const useCartStore = create<CartState>()(
            set({
               vendorId: item.vendor_id,
               vendorName: item.kitchen_name,
-              items: [{ ...item, dates, is_continuous: isContinuous }]
+              items: [{ ...item, id: cartItemId, service_type: serviceType, dates, is_continuous: isContinuous }]
            });
            return;
         }
 
-        // If from same vendor, check if already in cart
-        const existingItem = state.items.find((i) => i.meal_id === item.meal_id);
+        // If from same vendor, check if already in cart by ID
+        const existingItem = state.items.find((i) => i.id === cartItemId);
         if (existingItem) {
           set({
             items: state.items.map((i) => 
-              i.meal_id === item.meal_id 
+              i.id === cartItemId 
                 ? { ...i, dates, is_continuous: isContinuous } 
                 : i
             )
           });
         } else {
-          set({ items: [...state.items, { ...item, dates, is_continuous: isContinuous }] });
+          set({ items: [...state.items, { ...item, id: cartItemId, service_type: serviceType, dates, is_continuous: isContinuous }] });
         }
       },
 
-      removeItem: (mealId) => {
+      removeItem: (cartItemId) => {
         const state = get();
-        const newItems = state.items.filter((i) => i.meal_id !== mealId);
+        const newItems = state.items.filter((i) => i.id !== cartItemId);
         
         if (newItems.length === 0) {
           set({ items: [], vendorId: null, vendorName: null });

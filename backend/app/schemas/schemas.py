@@ -346,5 +346,6 @@ class SubscriptionSchema(BaseModel):
     subscription_start_date: Optional[date] = None
     subscription_end_date: Optional[date] = None
     meal: Optional[MealSchema] = None
+    service_type: Optional[str] = None
     class Config:
         from_attributes = True

@@ -1103,6 +1103,11 @@
   font-weight: 700;
   color: white;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  /* Base max width to prevent pushing */
 }
 
 .cd-fc-view-menu {
@@ -1130,7 +1135,7 @@
   background: #6366f1;
   /* Solid highlighted color */
   border: none;
-  padding: 4px 14px;
+  padding: 10px 16px;
   border-radius: 999px;
   display: flex;
   flex-direction: column-reverse;
@@ -1139,14 +1144,13 @@
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   transition: background 0.2s ease, box-shadow 0.2s ease;
-  min-width: 96px;
-  /* Keep size constant */
-  min-height: 42px;
-  /* Prevent vertical shrinking */
+  min-width: 80px;
+  /* min-height: 40px; Slightly reduced */
 }
 
 .cd-fc-view-btn.confirm {
   background: #ef4444;
+  padding: 10px 20px;
   /* Solid red for remove */
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
@@ -1196,5 +1200,32 @@
 @media (max-width: 480px) {
   .cd-hide-on-mobile {
     display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .cd-fc-vendor-name {
+    max-width: 100px;
+    font-size: 0.8rem;
+  }
+
+  .cd-fc-view-btn {
+    padding: 9px 11px;
+  }
+
+  .cd-fc-view-text {
+    font-size: 0.75rem;
+  }
+
+  .cd-fc-left {
+    gap: 6px;
+  }
+
+  .cd-floating-cart-wrapper {
+    padding: 6px 6px 6px 8px;
+  }
+
+  .cd-fc-right {
+    gap: 4px;
   }
 }

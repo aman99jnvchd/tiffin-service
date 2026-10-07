@@ -1,4 +1,3 @@
-
 /* Bottom Sheet Container */
 .ds-sheet {
   position: fixed;
@@ -37,6 +36,9 @@
 .ds-modal-footer {
   padding: 14px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Pull Indicator */
@@ -90,7 +92,7 @@
   letter-spacing: 1px;
   display: block;
   margin-bottom: 8px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Segmented Control (Service Types) */
@@ -138,6 +140,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  overflow: hidden;
 }
 
 .ds-input-icon {
@@ -149,9 +152,9 @@
 
 .ds-glass-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 12px 12px 12px 36px;
   color: white;
   font-size: 0.9rem;
@@ -214,20 +217,21 @@
 }
 
 .ds-clear-btn.active {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .ds-clear-btn.active:hover {
-  color: white;
-  border: 1px solid white;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* Date Grid */
 .ds-date-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -252,18 +256,25 @@
 }
 
 .ds-date-cell {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 12px 16px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 8px;
   cursor: pointer;
   color: white;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+}
+
+.ds-date-cell:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .ds-date-cell.selected {
@@ -275,28 +286,20 @@
 }
 
 .ds-day-name {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
-  margin-bottom: 6px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.5px;
 }
 
 .ds-date-cell.selected .ds-day-name {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .ds-day-num {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
-}
-
-.ds-date-slot-text {
-  font-size: 0.6rem;
-  margin-top: 4px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
 }
 
 .ds-check-icon {
@@ -307,19 +310,37 @@
 }
 
 .ds-modal-footer button {
-  width: 100%;
+  flex: 1 1 calc(50% - 12px);
+  min-width: 140px;
+  /* Forces wrap on very small screens < ~330px */
   border-radius: 12px;
   padding: 14px;
   font-weight: 600;
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
   border: none;
   box-shadow: none;
   text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ds-modal-footer button.ds-schedule-btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+}
+
+.ds-modal-footer button.ds-schedule-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .ds-modal-footer button:hover {
-  box-shadow: none;
   transform: none;
+  filter: brightness(1.1);
 }
 
 /* Responsive */
@@ -333,14 +354,13 @@
   }
 }
 
-@media (max-width: 350px) {
+@media (max-width: 360px) {
   .ds-scroll-content {
     padding: 0 16px 16px 16px;
   }
 
   .ds-date-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 6px;
   }
 
   .ds-modal-header h3 {
@@ -348,11 +368,12 @@
   }
 
   .ds-date-cell {
-    padding: 8px 4px;
+    padding: 10px 12px;
+    gap: 6px;
   }
 
   .ds-day-num {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
   }
 
   .ds-meal-name {
